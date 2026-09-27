@@ -1,90 +1,54 @@
-import { test, expect } from '@playwright/test';
+import {
+    test,
+    expect,
+} from '@playwright/test';
+
+import {
+    createProcessAtFormStage,
+    fillProcessFormFields,
+} from '../../support/uc3/process-flow';
+
+test.setTimeout(120_000);
 
 test(
     'EUV-UC3-002 · completar información del inversionista y avanzar a documentos',
     async ({ page }, testInfo) => {
-
-        const amount = '89000000';
-        const termKey = 540; // 18 meses
-
-        let processId = '';
-        let selectedBankId = '';
-
         /*
+         * ============================================================
          * PREPARACIÓN
-         * No es todavía el comportamiento que pretende demostrar este EUV.
+         * ============================================================
+         *
+         * Creamos un proceso y lo dejamos en Formulario.
+         *
+         * NO completamos ni enviamos el formulario todavía.
          */
-        await test.step(
+        const context = await test.step(
             'PREPARACIÓN · existe un proceso en etapa de formulario',
             async () => {
-                await page.goto('/');
-
-                await expect(
-                    page.locator('#global-nav-account')
-                ).toBeVisible();
-
-                await page
-                    .locator('#simulator-investment-amount')
-                    .fill(amount);
-
-                await page
-                    .locator(`#simulator-term-${termKey}`)
-                    .click();
-
-                await page
-                    .locator('#simulator-submit')
-                    .click();
-
-                await expect(
-                    page.locator('#simulator-results')
-                ).toBeVisible();
-
-                // Selección determinista por identidad de dominio.
-                const ids = await page
-                    .locator('[id^="simulator-offer-open-"]')
-                    .evaluateAll(elements =>
-                        elements.map(element => element.id)
-                    );
-
-                const bankIds = ids
-                    .map(id =>
-                        Number(
-                            id.replace('simulator-offer-open-', '')
-                        )
-                    )
-                    .filter(Number.isFinite)
-                    .sort((a, b) => a - b);
-
-                expect(
-                    bankIds.length,
-                    'debe existir al menos una alternativa disponible'
-                ).toBeGreaterThan(0);
-
-                selectedBankId = String(bankIds[0]);
-
-                await Promise.all([
-                    page.waitForURL(
-                        /\/portal\/process\/[^/?#]+/,
-                        { timeout: 15_000 }
-                    ),
-
+                return await createProcessAtFormStage(
                     page
-                        .locator(
-                            `#simulator-offer-open-${selectedBankId}`
-                        )
-                        .click(),
-                ]);
-
-                const pathname = new URL(page.url()).pathname;
-
-                const match = pathname.match(
-                    /^\/portal\/process\/([^/]+)$/
                 );
+            }
+        );
 
-                expect(match).not.toBeNull();
+        const {
+            amount,
+            termDays,
+            selectedBankId,
+            processId,
+        } = context;
 
-                processId = match![1];
+        let documentNumber = '';
 
+        /*
+         * ============================================================
+         * EUV
+         * ============================================================
+         */
+
+        await test.step(
+            'DADO un proceso en etapa de información personal y financiera',
+            async () => {
                 await expect(
                     page.locator('#process-stage-form')
                 ).toBeVisible();
@@ -92,89 +56,33 @@ test(
                 await expect(
                     page.locator('#process-form')
                 ).toBeVisible();
-            }
-        );
-
-        /*
-         * AQUÍ COMIENZA EL EUV.
-         */
-        await test.step(
-            'DADO un proceso en etapa de información personal y financiera',
-            async () => {
-                await expect(
-                    page.locator('#process-form')
-                ).toHaveCount(1);
 
                 await expect(
                     page.locator('#process-form-submit')
-                ).toHaveCount(1);
+                ).toBeVisible();
             }
         );
 
         await test.step(
             'CUANDO el inversionista completa la información requerida',
             async () => {
+                const formData =
+                    await fillProcessFormFields(
+                        page
+                    );
 
-                const uniqueDocument =
-                    String(Date.now()).slice(-10);
-
-                await page
-                    .locator('#process-form-full-name')
-                    .fill('Usuario PAREX E2E');
-
-                await page
-                    .locator('#process-form-birth-date')
-                    .fill('1999-11-02');
-
-                await page
-                    .locator('#process-form-document-number')
-                    .fill(uniqueDocument);
-
-                await page
-                    .locator('#process-form-phone')
-                    .fill('3001234567');
-
-                await page
-                    .locator('#process-form-city')
-                    .fill('Bogota');
-
-                await page
-                    .locator('#process-form-address')
-                    .fill('Calle de prueba 123');
-
-                await page
-                    .locator('#process-form-occupation')
-                    .fill('Ingeniero');
-
-                await page
-                    .locator('#process-form-economic-activity')
-                    .fill('Empleado');
-
-                await page
-                    .locator('#process-form-monthly-income')
-                    .fill('12000000');
-
-                await page
-                    .locator('#process-form-monthly-expenses')
-                    .fill('5000000');
-
-                await page
-                    .locator('#process-form-total-assets')
-                    .fill('20000000');
-
-                await page
-                    .locator('#process-form-total-liabilities')
-                    .fill('1000000');
-
-                await page
-                    .locator('#process-form-source-of-funds')
-                    .fill('Salario');
+                documentNumber =
+                    formData.documentNumber;
             }
         );
 
         await test.step(
             'Y solicita guardar y continuar',
             async () => {
+                await expect(
+                    page.locator('#process-form-submit')
+                ).toBeEnabled();
+
                 await page
                     .locator('#process-form-submit')
                     .click();
@@ -184,13 +92,20 @@ test(
         await test.step(
             'ENTONCES el proceso abandona el formulario y avanza a documentos',
             async () => {
-
+                /*
+                 * Oráculo principal.
+                 */
                 await expect(
-                    page.locator('#process-stage-documents')
+                    page.locator(
+                        '#process-stage-documents'
+                    )
                 ).toBeVisible({
                     timeout: 15_000,
                 });
 
+                /*
+                 * Formulario ya no debe estar disponible.
+                 */
                 await expect(
                     page.locator('#process-stage-form')
                 ).toHaveCount(0);
@@ -199,41 +114,80 @@ test(
                     page.locator('#process-form')
                 ).toHaveCount(0);
 
-                // El proceso continúa siendo el mismo.
+                /*
+                 * Sigue siendo el mismo proceso.
+                 */
                 await expect(page).toHaveURL(
-                    new RegExp(`/portal/process/${processId}`)
+                    new RegExp(
+                        `/portal/process/${processId}(?:[/?#]|$)`
+                    )
                 );
+
+                await expect(
+                    page.locator('#process-error')
+                ).toHaveCount(0);
             }
         );
 
+        /*
+         * ============================================================
+         * EVIDENCIA
+         * ============================================================
+         */
         await testInfo.attach(
             'contexto-ejecucion',
             {
                 body: Buffer.from(
                     JSON.stringify(
                         {
-                            environment: process.env.TEST_ENV ?? 'dev',
+                            environment:
+                                process.env.TEST_ENV ??
+                                'dev',
+
+                            euv:
+                                'EUV-UC3-002',
+
+                            description:
+                                'Completar información del inversionista y avanzar a documentos',
+
                             processId,
+
                             selectedBankId,
-                            amount: Number(amount),
-                            termDays: termKey,
-                            resultingStage: 'documents',
+
+                            amount:
+                                Number(amount),
+
+                            termDays,
+
+                            syntheticDocumentNumber:
+                                documentNumber,
+
+                            resultingStage:
+                                'documents',
+
+                            finalUrl:
+                                page.url(),
                         },
                         null,
                         2
                     )
                 ),
-                contentType: 'application/json',
+
+                contentType:
+                    'application/json',
             }
         );
 
         await testInfo.attach(
             'evidencia-etapa-documentos',
             {
-                body: await page.screenshot({
-                    fullPage: true,
-                }),
-                contentType: 'image/png',
+                body:
+                    await page.screenshot({
+                        fullPage: true,
+                    }),
+
+                contentType:
+                    'image/png',
             }
         );
     }
