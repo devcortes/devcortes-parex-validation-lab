@@ -247,6 +247,57 @@ export class SigningE2EDriver {
         );
     }
 
+    async waitForOtpRequested(
+        timeoutMs = 30_000
+    ): Promise<void> {
+        const startedAt =
+            Date.now();
+
+        while (
+            Date.now() - startedAt <
+            timeoutMs
+        ) {
+            const state =
+                await this.state();
+
+            if (state.error) {
+                throw new Error(
+                    `otp: ${state.error}`
+                );
+            }
+
+            if (
+                state.screen === 'otp' &&
+                state.stage === 'otp' &&
+                state.otpSent === true
+            ) {
+                return;
+            }
+
+            await this.page.waitForTimeout(
+                200
+            );
+        }
+
+        const finalState =
+            await this.state();
+
+        throw new Error(
+            `timeout esperando OTP. Estado: ${JSON.stringify(
+                {
+                    screen:
+                        finalState.screen,
+                    stage:
+                        finalState.stage,
+                    otpSent:
+                        finalState.otpSent,
+                    error:
+                        finalState.error,
+                }
+            )}`
+        );
+    }
+
     async goToIdentity(): Promise<void> {
         await this.page.evaluate(
             () => {
@@ -334,6 +385,21 @@ export class SigningE2EDriver {
             {
                 base64,
                 mime,
+            }
+        );
+    }
+
+    async acceptConsent(): Promise<void> {
+        await this.page.evaluate(
+            async () => {
+                await (
+                    window as unknown as {
+                        __signingE2E: {
+                            acceptConsent:
+                            () => Promise<void>;
+                        };
+                    }
+                ).__signingE2E.acceptConsent();
             }
         );
     }
@@ -573,6 +639,70 @@ export async function prepareSigningAtSignatureScreen(
     expect(
         state.screen
     ).toBe('signature');
+
+    expect(
+        state.error
+    ).toBe('');
+
+    return {
+        context,
+        driver,
+    };
+}
+
+export async function prepareSigningAtConsentScreen(
+    page: Page,
+    faceFixturePath: string
+): Promise<{
+    context: SigningContext;
+    driver: SigningE2EDriver;
+}> {
+    const preparation =
+        await prepareSigningAtSignatureScreen(
+            page,
+            faceFixturePath
+        );
+
+    const {
+        context,
+        driver,
+    } = preparation;
+
+    const signature =
+        readFixtureBase64(
+            'tests/fixtures/signing/signature.png'
+        );
+
+    await driver.submitSignature(
+        signature,
+        'image/png'
+    );
+
+    await driver.waitForScreen(
+        'consent',
+        30_000
+    );
+
+    const state =
+        await driver.state();
+
+    expect(
+        state.signId
+    ).toBe(
+        context.signId
+    );
+
+    expect(
+        state.screen
+    ).toBe('consent');
+
+    expect(
+        state.stage
+    ).toBe('consent');
+
+    expect(
+        state.uploads?.signature.uploaded
+    ).toBe(true);
 
     expect(
         state.error
