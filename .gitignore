@@ -7,3 +7,5 @@ node_modules/
 .auth/
 playwright-report/
 test-results/
+
+.private/
