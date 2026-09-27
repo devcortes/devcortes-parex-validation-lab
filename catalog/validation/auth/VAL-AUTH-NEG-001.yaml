@@ -1,0 +1,57 @@
+id: VAL-AUTH-NEG-001
+
+title: Credenciales inválidas producen un rechazo observable
+
+type: functional-validation
+
+capability: authentication
+
+environment:
+  allowed:
+    - dev
+    - pro
+
+purpose: >
+  Demostrar que el sistema rechaza credenciales inválidas,
+  informa el rechazo de manera observable y no establece
+  una sesión autenticada.
+
+preconditions:
+  - La pantalla de autenticación está disponible.
+
+given:
+  - El usuario no se encuentra autenticado.
+
+when:
+  - Ingresa un correo que no corresponde a un usuario válido.
+  - Ingresa una contraseña inválida.
+  - Solicita iniciar sesión.
+
+then:
+  - Se presenta un mensaje de rechazo.
+  - El usuario permanece en la pantalla de inicio de sesión.
+  - "Mi cuenta" no está disponible.
+  - "Salir" no está disponible.
+
+testability_contract:
+  - login-email
+  - login-password
+  - portal-login-submit
+  - portal-login-error
+  - global-nav-account
+  - global-nav-logout
+
+evidence:
+  - execution-result
+  - screenshot
+  - duration
+
+automation:
+  framework: playwright
+  project: public
+  spec: tests/validation/auth/VAL-AUTH-NEG-001.public.spec.ts
+
+tags:
+  - auth
+  - negative
+  - smoke

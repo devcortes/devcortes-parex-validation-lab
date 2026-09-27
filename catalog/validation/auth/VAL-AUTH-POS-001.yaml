@@ -1,0 +1,57 @@
+id: VAL-AUTH-POS-001
+
+title: Credenciales válidas establecen una sesión autenticada
+
+type: functional-validation
+
+capability: authentication
+
+environment:
+  allowed:
+    - dev
+    - pro
+
+purpose: >
+  Demostrar que un usuario con credenciales válidas puede autenticarse
+  y que la interfaz refleja de manera observable el estado autenticado.
+
+preconditions:
+  - Usuario de pruebas existente en el ambiente objetivo.
+  - Credenciales válidas configuradas para el ambiente.
+
+given:
+  - El usuario se encuentra en la pantalla de inicio de sesión.
+  - El usuario no tiene una sesión autenticada activa.
+
+when:
+  - Ingresa un correo válido.
+  - Ingresa una contraseña válida.
+  - Solicita iniciar sesión.
+
+then:
+  - El control "Mi cuenta" está disponible.
+  - El control "Salir" está disponible.
+  - El control "Iniciar sesión" deja de estar disponible.
+
+testability_contract:
+  - login-email
+  - login-password
+  - portal-login-submit
+  - global-nav-account
+  - global-nav-logout
+  - global-nav-login
+
+evidence:
+  - execution-result
+  - screenshot
+  - duration
+
+automation:
+  framework: playwright
+  project: public
+  spec: tests/validation/auth/VAL-AUTH-POS-001.public.spec.ts
+
+tags:
+  - auth
+  - positive
+  - smoke
