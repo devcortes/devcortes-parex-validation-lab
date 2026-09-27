@@ -12,6 +12,18 @@ test.setTimeout(120_000);
 test(
     'EUV-UC3-005 · iniciar la ceremonia de firma',
     async ({ page }, testInfo) => {
+
+        testInfo.annotations.push({
+            type: 'known_issue',
+            description: 'DEF-UC3-SIGN-001',
+        });
+
+        testInfo.annotations.push({
+            type: 'workaround',
+            description:
+                'Reload en etapa Signature antes de iniciar la ceremonia.',
+        });
+
         let signId = '';
         let portalReturnUrl = '';
 

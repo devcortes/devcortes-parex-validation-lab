@@ -1,0 +1,47 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: parex-postgres
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_DB: parex
+      POSTGRES_USER: parex
+      POSTGRES_PASSWORD: parex_local
+
+    ports:
+      - "55432:5432"
+
+    volumes:
+      - parex_postgres_data:/var/lib/postgresql/data
+      - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U parex -d parex"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: parex-grafana
+    restart: unless-stopped
+
+    ports:
+      - "3000:3000"
+
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: parex_admin
+
+    volumes:
+      - parex_grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  parex_postgres_data:
+  parex_grafana_data:

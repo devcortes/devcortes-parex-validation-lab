@@ -78,11 +78,19 @@ export default defineConfig({
 
     reporter: [
         ['list'],
+
         [
             'html',
             {
-                outputFolder: 'playwright-report',
                 open: 'never',
+                outputFolder: 'playwright-report',
+            },
+        ],
+
+        [
+            'json',
+            {
+                outputFile: 'test-results/parex-results.json',
             },
         ],
     ],
