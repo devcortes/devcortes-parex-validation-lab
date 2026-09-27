@@ -3,16 +3,25 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "parex:dev": "tsx scripts/run-parex.ts dev",
+    "parex:test:dev": "cross-env TEST_ENV=dev playwright test tests/euv tests/validation --workers=1",
+    "parex:ingest:dev": "cross-env TEST_ENV=dev tsx scripts/ingest-results.ts",
+    "obs:up": "docker compose -f infrastructure/observability/docker-compose.yml up -d",
+    "obs:down": "docker compose -f infrastructure/observability/docker-compose.yml down",
+    "obs:ps": "docker compose -f infrastructure/observability/docker-compose.yml ps"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "devDependencies": {
-    "@playwright/test": "^1.63.0"
+    "@playwright/test": "^1.63.0",
+    "@types/pg": "^8.23.1",
+    "cross-env": "^10.1.0",
+    "tsx": "^4.23.15"
   },
   "dependencies": {
-    "dotenv": "^18.0.4"
+    "dotenv": "^18.0.4",
+    "pg": "^8.23.0"
   }
 }
