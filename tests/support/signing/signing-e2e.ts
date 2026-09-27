@@ -159,6 +159,36 @@ export class SigningE2EDriver {
         );
     }
 
+    async waitForStage(
+        stage: string,
+        timeoutMs = 60_000
+    ): Promise<void> {
+        await this.page.evaluate(
+            async ({
+                stage,
+                timeoutMs,
+            }) => {
+                await (
+                    window as unknown as {
+                        __signingE2E: {
+                            waitForStage: (
+                                stage: string,
+                                timeoutMs: number
+                            ) => Promise<void>;
+                        };
+                    }
+                ).__signingE2E.waitForStage(
+                    stage,
+                    timeoutMs
+                );
+            },
+            {
+                stage,
+                timeoutMs,
+            }
+        );
+    }
+
     async waitForEvidenceValidated(
         type:
             | 'id_front'
@@ -275,6 +305,36 @@ export class SigningE2EDriver {
 
         await this.waitForEvidenceValidated(
             type
+        );
+    }
+
+    async submitSignature(
+        base64: string,
+        mime = 'image/png'
+    ): Promise<void> {
+        await this.page.evaluate(
+            async ({
+                base64,
+                mime,
+            }) => {
+                await (
+                    window as unknown as {
+                        __signingE2E: {
+                            submitSignature: (
+                                base64: string,
+                                mime?: string
+                            ) => Promise<void>;
+                        };
+                    }
+                ).__signingE2E.submitSignature(
+                    base64,
+                    mime
+                );
+            },
+            {
+                base64,
+                mime,
+            }
         );
     }
 }
@@ -422,6 +482,104 @@ export async function prepareSigningCeremony(
                 page.url(),
         },
 
+        driver,
+    };
+}
+
+export async function prepareSigningAtSignatureScreen(
+    page: Page,
+    faceFixturePath: string
+): Promise<{
+    context: SigningContext;
+    driver: SigningE2EDriver;
+}> {
+    const preparation =
+        await prepareSigningCeremony(
+            page
+        );
+
+    const {
+        context,
+        driver,
+    } = preparation;
+
+    const idFront =
+        readFixtureBase64(
+            'tests/fixtures/signing/id-front.png'
+        );
+
+    const idBack =
+        readFixtureBase64(
+            'tests/fixtures/signing/id-back.png'
+        );
+
+    const face =
+        readFixtureBase64(
+            faceFixturePath
+        );
+
+    await driver.goToIdentity();
+
+    await driver.submitEvidence(
+        'id_front',
+        idFront,
+        'image/png'
+    );
+
+    await driver.submitEvidence(
+        'id_back',
+        idBack,
+        'image/png'
+    );
+
+    await driver.submitEvidence(
+        'face',
+        face,
+        'image/jpeg'
+    );
+
+    await driver.waitForScreen(
+        'signature',
+        30_000
+    );
+
+    const state =
+        await driver.state();
+
+    expect(
+        state.uploads?.id_front.uploaded
+    ).toBe(true);
+
+    expect(
+        state.uploads?.id_front.validated
+    ).toBe(true);
+
+    expect(
+        state.uploads?.id_back.uploaded
+    ).toBe(true);
+
+    expect(
+        state.uploads?.id_back.validated
+    ).toBe(true);
+
+    expect(
+        state.uploads?.face.uploaded
+    ).toBe(true);
+
+    expect(
+        state.uploads?.face.validated
+    ).toBe(true);
+
+    expect(
+        state.screen
+    ).toBe('signature');
+
+    expect(
+        state.error
+    ).toBe('');
+
+    return {
+        context,
         driver,
     };
 }
