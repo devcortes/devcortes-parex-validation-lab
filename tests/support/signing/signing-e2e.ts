@@ -389,6 +389,26 @@ export class SigningE2EDriver {
         );
     }
 
+    async setDebugOtpKey(
+        hexKey: string
+    ): Promise<void> {
+        await this.page.evaluate(
+            (key) => {
+                (
+                    window as unknown as {
+                        __signingE2E: {
+                            setDebugOtpKey:
+                            (key: string) => void;
+                        };
+                    }
+                ).__signingE2E.setDebugOtpKey(
+                    key
+                );
+            },
+            hexKey
+        );
+    }
+
     async acceptConsent(): Promise<void> {
         await this.page.evaluate(
             async () => {
@@ -401,6 +421,35 @@ export class SigningE2EDriver {
                     }
                 ).__signingE2E.acceptConsent();
             }
+        );
+    }
+
+    async debugOtp(): Promise<string> {
+        const state =
+            await this.state();
+
+        return state.debugOtp;
+    }
+
+    async confirmOtp(
+        code: string
+    ): Promise<void> {
+        await this.page.evaluate(
+            async (otp) => {
+                await (
+                    window as unknown as {
+                        __signingE2E: {
+                            confirmOtp:
+                            (
+                                otp: string
+                            ) => Promise<void>;
+                        };
+                    }
+                ).__signingE2E.confirmOtp(
+                    otp
+                );
+            },
+            code
         );
     }
 }
@@ -711,5 +760,71 @@ export async function prepareSigningAtConsentScreen(
     return {
         context,
         driver,
+    };
+}
+
+export async function prepareSigningAtOtpScreen(
+    page: Page,
+    faceFixturePath: string,
+    debugOtpKeyHex: string
+): Promise<{
+    context: SigningContext;
+    driver: SigningE2EDriver;
+    otp: string;
+}> {
+    const preparation =
+        await prepareSigningAtConsentScreen(
+            page,
+            faceFixturePath
+        );
+
+    const {
+        context,
+        driver,
+    } = preparation;
+
+    await driver.setDebugOtpKey(
+        debugOtpKeyHex
+    );
+
+    await driver.acceptConsent();
+
+    await driver.waitForOtpRequested(
+        30_000
+    );
+
+    const state =
+        await driver.state();
+
+    expect(
+        state.screen
+    ).toBe('otp');
+
+    expect(
+        state.stage
+    ).toBe('otp');
+
+    expect(
+        state.otpSent
+    ).toBe(true);
+
+    expect(
+        state.error
+    ).toBe('');
+
+    const otp =
+        await driver.debugOtp();
+
+    expect(
+        otp,
+        'el backend DEV debe exponer un OTP de seis dígitos cuando la compuerta debug está autorizada'
+    ).toMatch(
+        /^\d{6}$/
+    );
+
+    return {
+        context,
+        driver,
+        otp,
     };
 }
