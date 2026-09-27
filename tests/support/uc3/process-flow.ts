@@ -473,3 +473,100 @@ export async function uploadSyntheticDeclaration(
 
     return declaration;
 }
+
+/**
+ * Lleva un proceso nuevo hasta la etapa Signature.
+ *
+ * Se utiliza como PREPARACIÓN para los EUV que evalúan
+ * la ceremonia de firma.
+ *
+ * IMPORTANTE:
+ * esta función NO presiona "Firmar ahora".
+ *
+ * Por tanto, iniciar la ceremonia continúa siendo
+ * responsabilidad de EUV-UC3-005.
+ */
+export async function prepareProcessAtSignatureStage(
+    page: Page
+): Promise<ProcessContext> {
+    /*
+     * Crear proceso nuevo en etapa Formulario.
+     */
+    const processContext =
+        await createProcessAtFormStage(page);
+
+    /*
+     * Formulario -> Documentos.
+     */
+    await completeProcessForm(page);
+
+    /*
+     * Registrar declaración sintética.
+     */
+    await uploadSyntheticDeclaration(page);
+
+    /*
+     * Documentos -> Signature.
+     *
+     * Esta transición ya fue demostrada por EUV-UC3-004,
+     * por eso aquí funciona únicamente como preparación.
+     */
+    await expect(
+        page.locator('#process-advance-documents')
+    ).toBeVisible();
+
+    await expect(
+        page.locator('#process-advance-documents')
+    ).toBeEnabled();
+
+    await page
+        .locator('#process-advance-documents')
+        .click();
+
+    await expect(
+        page.locator('#process-stage-signature')
+    ).toBeVisible({
+        timeout: 15_000,
+    });
+
+    await expect(
+        page.locator('#process-stage-documents')
+    ).toHaveCount(0);
+
+    await expect(
+        page.locator('#process-error')
+    ).toHaveCount(0);
+
+    /*
+     * WORKAROUND TEMPORAL - defecto conocido del flujo de firma.
+     *
+     * Después de Documents -> Signature, el portal actualiza el
+     * process en memoria pero la información de la ceremonia
+     * (detail.signature) puede no quedar hidratada inmediatamente.
+     *
+     * Una recarga vuelve a consultar el detalle completo del proceso.
+     *
+     * Este reload NO forma parte del comportamiento evaluado por
+     * EUV-UC3-005. Es una precondición temporal para poder continuar
+     * validando el Signing SPA mientras se corrige el producto.
+     */
+    await page.reload({
+        waitUntil: 'domcontentloaded',
+    });
+
+    await expect(
+        page.locator('#process-stage-signature')
+    ).toBeVisible({
+        timeout: 15_000,
+    });
+
+    await expect(
+        page.locator('#process-signature-start')
+    ).toBeVisible();
+
+    await expect(
+        page.locator('#process-signature-start')
+    ).toBeEnabled();
+
+    return processContext;
+}
