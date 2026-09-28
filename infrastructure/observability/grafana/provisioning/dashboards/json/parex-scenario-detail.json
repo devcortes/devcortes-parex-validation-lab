@@ -335,6 +335,78 @@
                     "refId": "A"
                 }
             ]
+        },
+        {
+            "id": 14,
+            "title": "Hallazgos relacionados",
+            "type": "table",
+            "datasource": {
+                "type": "postgres",
+                "uid": "parex-postgres"
+            },
+            "gridPos": {
+                "x": 0,
+                "y": 39,
+                "w": 24,
+                "h": 10
+            },
+            "fieldConfig": {
+                "defaults": {},
+                "overrides": []
+            },
+            "options": {
+                "cellHeight": "sm",
+                "showHeader": true
+            },
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "postgres",
+                        "uid": "parex-postgres"
+                    },
+                    "editorMode": "code",
+                    "format": "table",
+                    "rawQuery": true,
+                    "rawSql": "\n            SELECT\n                issue_id AS \"ID\",\n\n                UPPER(\n                    severity\n                ) AS \"Severidad\",\n\n                status AS \"Estado\",\n\n                title AS \"Hallazgo\",\n\n                COALESCE(\n                    impact,\n                    '-'\n                ) AS \"Impacto\",\n\n                COALESCE(\n                    workaround,\n                    '-'\n                ) AS \"Workaround\",\n\n                COALESCE(\n                    resolution,\n                    '-'\n                ) AS \"Resolución\"\n\n            FROM vw_parex_scenario_issues\n\n            WHERE\n                scenario_id = '${scenario}'\n\n            ORDER BY\n                CASE status\n                    WHEN 'OPEN' THEN 0\n                    ELSE 1\n                END,\n\n                CASE severity\n                    WHEN 'critical' THEN 0\n                    WHEN 'high' THEN 1\n                    WHEN 'medium' THEN 2\n                    ELSE 3\n                END,\n\n                issue_id;\n            ",
+                    "refId": "A"
+                }
+            ]
+        },
+        {
+            "id": 15,
+            "title": "Evidencias registradas",
+            "type": "table",
+            "datasource": {
+                "type": "postgres",
+                "uid": "parex-postgres"
+            },
+            "gridPos": {
+                "x": 0,
+                "y": 49,
+                "w": 24,
+                "h": 11
+            },
+            "fieldConfig": {
+                "defaults": {},
+                "overrides": []
+            },
+            "options": {
+                "cellHeight": "sm",
+                "showHeader": true
+            },
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "postgres",
+                        "uid": "parex-postgres"
+                    },
+                    "editorMode": "code",
+                    "format": "table",
+                    "rawQuery": true,
+                    "rawSql": "\n            SELECT\n                run_started_at AS \"Ejecución\",\n\n                evidence_type AS \"Tipo\",\n\n                evidence_name AS \"Evidencia\",\n\n                CASE\n                    WHEN\n                        COALESCE(\n                            metadata ->> 'inline',\n                            'false'\n                        ) = 'true'\n                    THEN 'INLINE'\n\n                    WHEN evidence_path IS NOT NULL\n                    THEN 'ARCHIVO'\n\n                    ELSE 'REGISTRO'\n                END AS \"Origen\",\n\n                COALESCE(\n                    metadata ->> 'project',\n                    '-'\n                ) AS \"Proyecto\",\n\n                COALESCE(\n                    metadata ->> 'bodyLength',\n                    '-'\n                ) AS \"Longitud inline\",\n\n                COALESCE(\n                    evidence_path,\n                    '-'\n                ) AS \"Ruta\"\n\n            FROM vw_parex_evidence_detail\n\n            WHERE\n                test_id = '${scenario}'\n                AND environment = '${environment}'\n\n            ORDER BY\n                run_started_at DESC,\n                evidence_name\n\n            LIMIT 100;\n            ",
+                    "refId": "A"
+                }
+            ]
         }
     ],
     "refresh": "10s",

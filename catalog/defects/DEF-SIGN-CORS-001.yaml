@@ -1,0 +1,55 @@
+id: DEF-SIGN-CORS-001
+
+title: La API de firma rechazaba el header de autorización OTP utilizado en DEV
+
+status: resolved
+severity: high
+
+discovered_by:
+  - EUV-UC3-009
+
+related_scenarios:
+  - EUV-UC3-008
+  - EUV-UC3-009
+
+component:
+  - signing-spa
+  - signatures-api
+  - request-otp
+
+description: >
+  La automatización del segundo factor utiliza en DEV el header
+  X-Debug-OTP-Signature para demostrar que quien solicita el OTP
+  de pruebas conoce la llave configurada en AWS SSM.
+
+  La configuración CORS de la API permitía los headers estándar,
+  pero no autorizaba explícitamente X-Debug-OTP-Signature.
+
+impact: >
+  El navegador bloqueaba la petición antes de que la API pudiera
+  validar la autorización del mecanismo de OTP de pruebas.
+
+root_cause: >
+  La configuración genérica de CORS no incluía el header personalizado
+  utilizado por la compuerta de automatización OTP.
+
+workaround: null
+
+resolution: >
+  Se configuraron explícitamente los headers permitidos por CORS,
+  incluyendo X-Debug-OTP-Signature, y el cambio fue desplegado en DEV.
+
+evidence:
+  type: automated-validation
+  source: playwright
+  notes: >
+    El problema apareció mientras se automatizaba el recorrido completo
+    hasta la confirmación OTP de EUV-UC3-009.
+
+tags:
+  - uc3
+  - signing
+  - otp
+  - cors
+  - security
+  - resolved

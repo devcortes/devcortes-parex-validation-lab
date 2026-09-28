@@ -13,7 +13,10 @@
     "parex": "tsx scripts/parex-entry.ts",
     "parex:catalog:sync": "tsx scripts/sync-catalog.ts",
     "parex:grafana:build": "tsx scripts/build-grafana-dashboard.ts",
-    "parex:cli": "tsx scripts/parex.ts"
+    "parex:cli": "tsx scripts/parex.ts",
+    "parex:defects": "tsx scripts/validate-defects.ts",
+    "parex:defects:sync": "tsx scripts/sync-defects.ts",
+    "parex:sync": "npm run parex:catalog:sync && npm run parex:defects:sync"
   },
   "keywords": [],
   "author": "",

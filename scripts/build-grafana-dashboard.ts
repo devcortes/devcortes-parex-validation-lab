@@ -790,7 +790,7 @@ function buildMainDashboard() {
 
         tablePanel(
             14,
-            'Defectos conocidos',
+            'Hallazgos registrados',
             `
             SELECT
                 issue_id AS "Defecto",
@@ -805,6 +805,9 @@ function buildMainDashboard() {
                 ) AS "Workaround"
 
             FROM known_issues
+
+            WHERE
+                is_present = TRUE
 
             ORDER BY
                 CASE
@@ -1241,6 +1244,120 @@ function buildScenarioDashboard() {
             29,
             24,
             10
+        ),
+
+        tablePanel(
+            14,
+            'Hallazgos relacionados',
+            `
+            SELECT
+                issue_id AS "ID",
+
+                UPPER(
+                    severity
+                ) AS "Severidad",
+
+                status AS "Estado",
+
+                title AS "Hallazgo",
+
+                COALESCE(
+                    impact,
+                    '-'
+                ) AS "Impacto",
+
+                COALESCE(
+                    workaround,
+                    '-'
+                ) AS "Workaround",
+
+                COALESCE(
+                    resolution,
+                    '-'
+                ) AS "Resolución"
+
+            FROM vw_parex_scenario_issues
+
+            WHERE
+                scenario_id = '\${scenario}'
+
+            ORDER BY
+                CASE status
+                    WHEN 'OPEN' THEN 0
+                    ELSE 1
+                END,
+
+                CASE severity
+                    WHEN 'critical' THEN 0
+                    WHEN 'high' THEN 1
+                    WHEN 'medium' THEN 2
+                    ELSE 3
+                END,
+
+                issue_id;
+            `,
+            0,
+            39,
+            24,
+            10
+        ),
+
+        tablePanel(
+            15,
+            'Evidencias registradas',
+            `
+            SELECT
+                run_started_at AS "Ejecución",
+
+                evidence_type AS "Tipo",
+
+                evidence_name AS "Evidencia",
+
+                CASE
+                    WHEN
+                        COALESCE(
+                            metadata ->> 'inline',
+                            'false'
+                        ) = 'true'
+                    THEN 'INLINE'
+
+                    WHEN evidence_path IS NOT NULL
+                    THEN 'ARCHIVO'
+
+                    ELSE 'REGISTRO'
+                END AS "Origen",
+
+                COALESCE(
+                    metadata ->> 'project',
+                    '-'
+                ) AS "Proyecto",
+
+                COALESCE(
+                    metadata ->> 'bodyLength',
+                    '-'
+                ) AS "Longitud inline",
+
+                COALESCE(
+                    evidence_path,
+                    '-'
+                ) AS "Ruta"
+
+            FROM vw_parex_evidence_detail
+
+            WHERE
+                test_id = '\${scenario}'
+                AND environment = '\${environment}'
+
+            ORDER BY
+                run_started_at DESC,
+                evidence_name
+
+            LIMIT 100;
+            `,
+            0,
+            49,
+            24,
+            11
         ),
     ];
 

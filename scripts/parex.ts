@@ -272,12 +272,27 @@ function loadScenarios():
                 )
         )
         .filter(
-            (filePath) =>
-                !normalizePath(
-                    filePath
-                ).includes(
-                    '/catalog/suites/'
-                )
+            (filePath) => {
+                const relative =
+                    normalizePath(
+                        path.relative(
+                            ROOT,
+                            filePath
+                        )
+                    );
+
+                return (
+                    relative.startsWith(
+                        'catalog/euv/'
+                    ) ||
+                    relative.startsWith(
+                        'catalog/validation/'
+                    ) ||
+                    relative.startsWith(
+                        'catalog/preconditions/'
+                    )
+                );
+            }
         )
         .map(
             (
@@ -1226,7 +1241,7 @@ function validateCatalogBeforeRun():
             : 'npx';
 
     console.log(
-        'Validando catálogo semántico...'
+        'Validando catálogo...'
     );
 
     const result =
