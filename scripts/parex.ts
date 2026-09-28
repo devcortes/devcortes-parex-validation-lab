@@ -609,10 +609,21 @@ function scenarioContext(
         );
     }
 
-    return (
-        scenario.capability ??
-        '-'
-    );
+    switch (
+    scenario.capability
+    ) {
+        case 'authentication':
+            return 'Autenticación';
+
+        case 'registration':
+            return 'Registro';
+
+        default:
+            return (
+                scenario.capability ??
+                '-'
+            );
+    }
 }
 
 function riskLabel(
