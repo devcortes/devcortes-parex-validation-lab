@@ -9,3 +9,7 @@ playwright-report/
 test-results/
 
 .private/
+
+# Evidencias locales de ejecución PAREX.
+# Pueden contener información sensible de pruebas.
+artifacts/
