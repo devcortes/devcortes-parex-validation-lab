@@ -9,6 +9,7 @@ status: automated
 environment:
   allowed:
     - dev
+    - pro
   default: dev
 
 capability: authentication
@@ -20,7 +21,7 @@ objective: >
 
 scenario:
   given:
-    - Existe un usuario de pruebas configurado para el ambiente DEV.
+    - Existe un usuario de pruebas configurado para el ambiente seleccionado.
     - Las credenciales se encuentran disponibles únicamente en la configuración local de ejecución.
   when:
     - La preparación de Playwright intenta autenticarse con las credenciales configuradas.

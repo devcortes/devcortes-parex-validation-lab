@@ -9,6 +9,7 @@ status: automated
 environment:
   allowed:
     - dev
+    - pro
   default: dev
 
 use_case:
