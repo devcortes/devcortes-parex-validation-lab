@@ -10,23 +10,25 @@
     "liveNow": false,
     "panels": [
         {
-            "datasource": {
-                "type": "postgres",
-                "uid": "parex-postgres"
-            },
-            "fieldConfig": {
-                "defaults": {
-                    "unit": "short"
-                },
-                "overrides": []
-            },
-            "gridPos": {
-                "h": 5,
-                "w": 4,
-                "x": 0,
-                "y": 0
-            },
             "id": 1,
+            "title": "Escenarios definidos",
+            "type": "stat",
+            "datasource": {
+                "type": "postgres",
+                "uid": "parex-postgres"
+            },
+            "gridPos": {
+                "x": 0,
+                "y": 0,
+                "w": 4,
+                "h": 5
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "short"
+                },
+                "overrides": []
+            },
             "options": {
                 "colorMode": "value",
                 "graphMode": "none",
@@ -50,31 +52,31 @@
                     "editorMode": "code",
                     "format": "table",
                     "rawQuery": true,
-                    "rawSql": "SELECT total AS \"Total\" FROM test_runs WHERE environment = '${environment}' ORDER BY started_at DESC LIMIT 1;",
+                    "rawSql": "\n            SELECT\n                COUNT(*) AS \"Escenarios definidos\"\n            FROM test_definitions d\n            WHERE\n                d.is_present = TRUE\n                AND d.count_as_scenario = TRUE\n                AND d.allowed_environments\n                    ? LOWER('${environment}');\n            ",
                     "refId": "A"
                 }
-            ],
-            "title": "Total pruebas",
-            "type": "stat"
+            ]
         },
         {
-            "datasource": {
-                "type": "postgres",
-                "uid": "parex-postgres"
-            },
-            "fieldConfig": {
-                "defaults": {
-                    "unit": "short"
-                },
-                "overrides": []
-            },
-            "gridPos": {
-                "h": 5,
-                "w": 4,
-                "x": 4,
-                "y": 0
-            },
             "id": 2,
+            "title": "Automatizados",
+            "type": "stat",
+            "datasource": {
+                "type": "postgres",
+                "uid": "parex-postgres"
+            },
+            "gridPos": {
+                "x": 4,
+                "y": 0,
+                "w": 4,
+                "h": 5
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "short"
+                },
+                "overrides": []
+            },
             "options": {
                 "colorMode": "value",
                 "graphMode": "none",
@@ -98,31 +100,31 @@
                     "editorMode": "code",
                     "format": "table",
                     "rawQuery": true,
-                    "rawSql": "SELECT passed AS \"PASS\" FROM test_runs WHERE environment = '${environment}' ORDER BY started_at DESC LIMIT 1;",
+                    "rawSql": "\n            SELECT\n                COUNT(*) AS \"Automatizados\"\n            FROM test_definitions d\n            WHERE\n                d.is_present = TRUE\n                AND d.count_as_scenario = TRUE\n                AND d.catalog_status = 'automated'\n                AND d.allowed_environments\n                    ? LOWER('${environment}');\n            ",
                     "refId": "A"
                 }
-            ],
-            "title": "PASS",
-            "type": "stat"
+            ]
         },
         {
-            "datasource": {
-                "type": "postgres",
-                "uid": "parex-postgres"
-            },
-            "fieldConfig": {
-                "defaults": {
-                    "unit": "short"
-                },
-                "overrides": []
-            },
-            "gridPos": {
-                "h": 5,
-                "w": 4,
-                "x": 8,
-                "y": 0
-            },
             "id": 3,
+            "title": "Ejecutados · último run",
+            "type": "stat",
+            "datasource": {
+                "type": "postgres",
+                "uid": "parex-postgres"
+            },
+            "gridPos": {
+                "x": 8,
+                "y": 0,
+                "w": 4,
+                "h": 5
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "short"
+                },
+                "overrides": []
+            },
             "options": {
                 "colorMode": "value",
                 "graphMode": "none",
@@ -146,65 +148,24 @@
                     "editorMode": "code",
                     "format": "table",
                     "rawQuery": true,
-                    "rawSql": "SELECT failed AS \"FAIL\" FROM test_runs WHERE environment = '${environment}' ORDER BY started_at DESC LIMIT 1;",
+                    "rawSql": "\n            WITH latest AS (\n            SELECT run_id\n            FROM test_runs\n            WHERE environment = '${environment}'\n            ORDER BY started_at DESC\n            LIMIT 1\n        )\n\n            SELECT\n                COUNT(*) AS \"Ejecutados\"\n            FROM vw_parex_test_results_semantic v\n            JOIN latest l\n                ON l.run_id = v.run_id\n            WHERE\n                v.count_as_scenario = TRUE;\n            ",
                     "refId": "A"
                 }
-            ],
-            "title": "FAIL",
-            "type": "stat"
+            ]
         },
         {
-            "datasource": {
-                "type": "postgres",
-                "uid": "parex-postgres"
-            },
-            "fieldConfig": {
-                "defaults": {
-                    "unit": "short"
-                },
-                "overrides": []
-            },
-            "gridPos": {
-                "h": 5,
-                "w": 4,
-                "x": 12,
-                "y": 0
-            },
             "id": 4,
-            "options": {
-                "colorMode": "value",
-                "graphMode": "none",
-                "justifyMode": "auto",
-                "orientation": "auto",
-                "reduceOptions": {
-                    "calcs": [
-                        "lastNotNull"
-                    ],
-                    "fields": "",
-                    "values": false
-                },
-                "textMode": "auto"
-            },
-            "targets": [
-                {
-                    "datasource": {
-                        "type": "postgres",
-                        "uid": "parex-postgres"
-                    },
-                    "editorMode": "code",
-                    "format": "table",
-                    "rawQuery": true,
-                    "rawSql": "SELECT blocked AS \"BLOCKED\" FROM test_runs WHERE environment = '${environment}' ORDER BY started_at DESC LIMIT 1;",
-                    "refId": "A"
-                }
-            ],
-            "title": "BLOCKED",
-            "type": "stat"
-        },
-        {
+            "title": "PASS · escenarios",
+            "type": "stat",
             "datasource": {
                 "type": "postgres",
                 "uid": "parex-postgres"
+            },
+            "gridPos": {
+                "x": 12,
+                "y": 0,
+                "w": 4,
+                "h": 5
             },
             "fieldConfig": {
                 "defaults": {
@@ -212,13 +173,6 @@
                 },
                 "overrides": []
             },
-            "gridPos": {
-                "h": 5,
-                "w": 4,
-                "x": 16,
-                "y": 0
-            },
-            "id": 5,
             "options": {
                 "colorMode": "value",
                 "graphMode": "none",
@@ -242,31 +196,31 @@
                     "editorMode": "code",
                     "format": "table",
                     "rawQuery": true,
-                    "rawSql": "WITH latest AS (SELECT run_id FROM test_runs WHERE environment = '${environment}' ORDER BY started_at DESC LIMIT 1) SELECT COUNT(*) AS \"Workarounds\" FROM test_results r JOIN latest l ON l.run_id = r.run_id WHERE r.has_workaround = TRUE;",
+                    "rawSql": "\n            WITH latest AS (\n            SELECT run_id\n            FROM test_runs\n            WHERE environment = '${environment}'\n            ORDER BY started_at DESC\n            LIMIT 1\n        )\n\n            SELECT\n                COUNT(*) AS \"PASS\"\n            FROM vw_parex_test_results_semantic v\n            JOIN latest l\n                ON l.run_id = v.run_id\n            WHERE\n                v.count_as_scenario = TRUE\n                AND v.status = 'PASS';\n            ",
                     "refId": "A"
                 }
-            ],
-            "title": "PASS con workaround",
-            "type": "stat"
+            ]
         },
         {
+            "id": 5,
+            "title": "FAIL · escenarios",
+            "type": "stat",
             "datasource": {
                 "type": "postgres",
                 "uid": "parex-postgres"
+            },
+            "gridPos": {
+                "x": 16,
+                "y": 0,
+                "w": 4,
+                "h": 5
             },
             "fieldConfig": {
                 "defaults": {
-                    "unit": "percent"
+                    "unit": "short"
                 },
                 "overrides": []
             },
-            "gridPos": {
-                "h": 5,
-                "w": 4,
-                "x": 20,
-                "y": 0
-            },
-            "id": 6,
             "options": {
                 "colorMode": "value",
                 "graphMode": "none",
@@ -290,39 +244,79 @@
                     "editorMode": "code",
                     "format": "table",
                     "rawQuery": true,
-                    "rawSql": "SELECT ROUND((100.0 * passed / NULLIF(total, 0))::numeric, 2) AS \"Pass rate\" FROM test_runs WHERE environment = '${environment}' ORDER BY started_at DESC LIMIT 1;",
+                    "rawSql": "\n            WITH latest AS (\n            SELECT run_id\n            FROM test_runs\n            WHERE environment = '${environment}'\n            ORDER BY started_at DESC\n            LIMIT 1\n        )\n\n            SELECT\n                COUNT(*) AS \"FAIL\"\n            FROM vw_parex_test_results_semantic v\n            JOIN latest l\n                ON l.run_id = v.run_id\n            WHERE\n                v.count_as_scenario = TRUE\n                AND v.status = 'FAIL';\n            ",
                     "refId": "A"
                 }
-            ],
-            "title": "Pass rate",
-            "type": "stat"
+            ]
         },
         {
+            "id": 6,
+            "title": "BLOCKED · escenarios",
+            "type": "stat",
             "datasource": {
                 "type": "postgres",
                 "uid": "parex-postgres"
+            },
+            "gridPos": {
+                "x": 20,
+                "y": 0,
+                "w": 4,
+                "h": 5
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "short"
+                },
+                "overrides": []
+            },
+            "options": {
+                "colorMode": "value",
+                "graphMode": "none",
+                "justifyMode": "auto",
+                "orientation": "auto",
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "textMode": "auto"
+            },
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "postgres",
+                        "uid": "parex-postgres"
+                    },
+                    "editorMode": "code",
+                    "format": "table",
+                    "rawQuery": true,
+                    "rawSql": "\n            WITH latest AS (\n            SELECT run_id\n            FROM test_runs\n            WHERE environment = '${environment}'\n            ORDER BY started_at DESC\n            LIMIT 1\n        )\n\n            SELECT\n                COUNT(*) AS \"BLOCKED\"\n            FROM vw_parex_test_results_semantic v\n            JOIN latest l\n                ON l.run_id = v.run_id\n            WHERE\n                v.count_as_scenario = TRUE\n                AND v.status = 'BLOCKED';\n            ",
+                    "refId": "A"
+                }
+            ]
+        },
+        {
+            "id": 10,
+            "title": "Última ejecución · resultados por escenario",
+            "type": "table",
+            "datasource": {
+                "type": "postgres",
+                "uid": "parex-postgres"
+            },
+            "gridPos": {
+                "x": 0,
+                "y": 5,
+                "w": 24,
+                "h": 11
             },
             "fieldConfig": {
                 "defaults": {},
                 "overrides": []
             },
-            "gridPos": {
-                "h": 11,
-                "w": 16,
-                "x": 0,
-                "y": 5
-            },
-            "id": 7,
             "options": {
                 "cellHeight": "sm",
-                "footer": {
-                    "countRows": false,
-                    "fields": "",
-                    "reducer": [
-                        "sum"
-                    ],
-                    "show": false
-                },
                 "showHeader": true
             },
             "targets": [
@@ -334,39 +328,32 @@
                     "editorMode": "code",
                     "format": "table",
                     "rawQuery": true,
-                    "rawSql": "WITH latest AS (SELECT run_id FROM test_runs WHERE environment = '${environment}' ORDER BY started_at DESC LIMIT 1) SELECT r.test_id AS \"Test\", r.test_type AS \"Tipo\", COALESCE(r.use_case, '-') AS \"Caso de uso\", r.status AS \"Estado\", ROUND(r.duration_ms / 1000.0, 2) AS \"Duración (s)\", CASE WHEN r.has_workaround THEN 'SI' ELSE 'NO' END AS \"Workaround\", COALESCE(r.known_issue, '-') AS \"Defecto\" FROM test_results r JOIN latest l ON l.run_id = r.run_id ORDER BY CASE r.test_type WHEN 'PRECONDITION' THEN 0 WHEN 'EUV' THEN 1 WHEN 'VALIDATION' THEN 2 ELSE 3 END, r.test_id;",
+                    "rawSql": "\n            WITH latest AS (\n            SELECT run_id\n            FROM test_runs\n            WHERE environment = '${environment}'\n            ORDER BY started_at DESC\n            LIMIT 1\n        )\n\n            SELECT\n                COALESCE(\n                    v.use_case_id,\n                    v.capability,\n                    '-'\n                ) AS \"Contexto\",\n\n                v.test_id AS \"ID\",\n\n                v.scenario_name AS \"Escenario\",\n\n                UPPER(\n                    COALESCE(\n                        v.risk_level,\n                        '-'\n                    )\n                ) AS \"Riesgo\",\n\n                v.status AS \"Estado\",\n\n                ROUND(\n                    v.duration_ms / 1000.0,\n                    2\n                ) AS \"Duración (s)\",\n\n                CASE\n                    WHEN v.has_workaround\n                        THEN 'SI'\n                    ELSE 'NO'\n                END AS \"Workaround\",\n\n                COALESCE(\n                    v.known_issue,\n                    '-'\n                ) AS \"Defecto\"\n\n            FROM vw_parex_test_results_semantic v\n\n            JOIN latest l\n                ON l.run_id = v.run_id\n\n            WHERE\n                v.count_as_scenario = TRUE\n\n            ORDER BY\n                COALESCE(\n                    v.use_case_id,\n                    v.capability,\n                    ''\n                ),\n\n                v.sequence NULLS LAST,\n\n                v.test_id;\n            ",
                     "refId": "A"
                 }
-            ],
-            "title": "Última ejecución · detalle de pruebas",
-            "type": "table"
+            ]
         },
         {
+            "id": 11,
+            "title": "Cobertura de automatización",
+            "type": "table",
             "datasource": {
                 "type": "postgres",
                 "uid": "parex-postgres"
+            },
+            "gridPos": {
+                "x": 0,
+                "y": 16,
+                "w": 12,
+                "h": 9
             },
             "fieldConfig": {
                 "defaults": {},
                 "overrides": []
             },
-            "gridPos": {
-                "h": 11,
-                "w": 8,
-                "x": 16,
-                "y": 5
-            },
-            "id": 8,
             "options": {
-                "legend": {
-                    "displayMode": "list",
-                    "placement": "bottom",
-                    "showLegend": false
-                },
-                "orientation": "horizontal",
-                "showValue": "always",
-                "stacking": "none",
-                "xTickLabelRotation": 0
+                "cellHeight": "sm",
+                "showHeader": true
             },
             "targets": [
                 {
@@ -377,41 +364,76 @@
                     "editorMode": "code",
                     "format": "table",
                     "rawQuery": true,
-                    "rawSql": "WITH latest AS (SELECT run_id FROM test_runs WHERE environment = '${environment}' ORDER BY started_at DESC LIMIT 1) SELECT r.test_id AS \"Test\", ROUND(r.duration_ms / 1000.0, 2) AS \"Segundos\" FROM test_results r JOIN latest l ON l.run_id = r.run_id ORDER BY r.duration_ms DESC;",
+                    "rawSql": "\n            SELECT\n                COALESCE(\n                    d.use_case_id,\n                    CASE d.capability\n                        WHEN 'authentication' THEN 'Autenticación'\n                        WHEN 'registration' THEN 'Registro'\n                        ELSE d.capability\n                    END,\n                    'Sin contexto'\n                ) AS \"Contexto\",\n\n                COUNT(*) AS \"Definidos\",\n\n                COUNT(*) FILTER (\n                    WHERE\n                        d.catalog_status = 'automated'\n                ) AS \"Automatizados\",\n\n                COUNT(*) FILTER (\n                    WHERE\n                        d.risk_level = 'critical'\n                ) AS \"Críticos\",\n\n                ROUND(\n                    (\n                        100.0 *\n                        COUNT(*) FILTER (\n                            WHERE\n                                d.catalog_status = 'automated'\n                        ) /\n                        NULLIF(\n                            COUNT(*),\n                            0\n                        )\n                    )::numeric,\n                    2\n                ) AS \"Cobertura %\"\n\n            FROM test_definitions d\n\n            WHERE\n                d.is_present = TRUE\n                AND d.count_as_scenario = TRUE\n                AND d.allowed_environments\n                    ? LOWER('${environment}')\n\n            GROUP BY\n                COALESCE(\n                    d.use_case_id,\n                    d.capability,\n                    'Sin contexto'\n                )\n\n            ORDER BY 1;\n            ",
                     "refId": "A"
                 }
-            ],
-            "title": "Duración por prueba",
-            "type": "barchart"
+            ]
         },
         {
+            "id": 12,
+            "title": "Precondiciones técnicas · último run",
+            "type": "table",
             "datasource": {
                 "type": "postgres",
                 "uid": "parex-postgres"
             },
+            "gridPos": {
+                "x": 12,
+                "y": 16,
+                "w": 12,
+                "h": 9
+            },
+            "fieldConfig": {
+                "defaults": {},
+                "overrides": []
+            },
+            "options": {
+                "cellHeight": "sm",
+                "showHeader": true
+            },
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "postgres",
+                        "uid": "parex-postgres"
+                    },
+                    "editorMode": "code",
+                    "format": "table",
+                    "rawQuery": true,
+                    "rawSql": "\n            WITH latest AS (\n            SELECT run_id\n            FROM test_runs\n            WHERE environment = '${environment}'\n            ORDER BY started_at DESC\n            LIMIT 1\n        )\n\n            SELECT\n                v.test_id AS \"Precondición\",\n\n                v.scenario_name AS \"Nombre\",\n\n                v.status AS \"Estado\",\n\n                ROUND(\n                    v.duration_ms / 1000.0,\n                    2\n                ) AS \"Duración (s)\"\n\n            FROM vw_parex_test_results_semantic v\n\n            JOIN latest l\n                ON l.run_id = v.run_id\n\n            WHERE\n                v.count_as_scenario = FALSE\n\n            ORDER BY\n                v.test_id;\n            ",
+                    "refId": "A"
+                }
+            ]
+        },
+        {
+            "id": 13,
+            "title": "Tasa de aprobación histórica",
+            "type": "timeseries",
+            "datasource": {
+                "type": "postgres",
+                "uid": "parex-postgres"
+            },
+            "gridPos": {
+                "x": 0,
+                "y": 25,
+                "w": 12,
+                "h": 9
+            },
             "fieldConfig": {
                 "defaults": {
-                    "unit": "percent"
+                    "unit": "percent",
+                    "min": 0,
+                    "max": 100
                 },
                 "overrides": []
             },
-            "gridPos": {
-                "h": 9,
-                "w": 12,
-                "x": 0,
-                "y": 16
-            },
-            "id": 9,
             "options": {
                 "legend": {
-                    "calcs": [],
                     "displayMode": "list",
-                    "placement": "bottom",
-                    "showLegend": true
+                    "placement": "bottom"
                 },
                 "tooltip": {
-                    "mode": "single",
-                    "sort": "none"
+                    "mode": "single"
                 }
             },
             "targets": [
@@ -423,39 +445,31 @@
                     "editorMode": "code",
                     "format": "time_series",
                     "rawQuery": true,
-                    "rawSql": "SELECT started_at AS \"time\", (100.0 * passed / NULLIF(total, 0)) AS \"Pass rate\" FROM test_runs WHERE environment = '${environment}' ORDER BY started_at;",
+                    "rawSql": "\n            SELECT\n                tr.started_at AS \"time\",\n\n                (\n                    100.0 *\n                    COUNT(*) FILTER (\n                        WHERE\n                            v.status = 'PASS'\n                    ) /\n                    NULLIF(\n                        COUNT(*),\n                        0\n                    )\n                )::double precision\n                    AS \"Tasa de aprobación\"\n\n            FROM test_runs tr\n\n            JOIN vw_parex_test_results_semantic v\n                ON v.run_id = tr.run_id\n\n            WHERE\n                tr.environment = '${environment}'\n                AND v.count_as_scenario = TRUE\n\n            GROUP BY\n                tr.run_id,\n                tr.started_at\n\n            ORDER BY\n                tr.started_at;\n            ",
                     "refId": "A"
                 }
-            ],
-            "title": "Pass rate histórico",
-            "type": "timeseries"
+            ]
         },
         {
+            "id": 14,
+            "title": "Defectos conocidos",
+            "type": "table",
             "datasource": {
                 "type": "postgres",
                 "uid": "parex-postgres"
+            },
+            "gridPos": {
+                "x": 12,
+                "y": 25,
+                "w": 12,
+                "h": 9
             },
             "fieldConfig": {
                 "defaults": {},
                 "overrides": []
             },
-            "gridPos": {
-                "h": 9,
-                "w": 12,
-                "x": 12,
-                "y": 16
-            },
-            "id": 10,
             "options": {
                 "cellHeight": "sm",
-                "footer": {
-                    "countRows": false,
-                    "fields": "",
-                    "reducer": [
-                        "sum"
-                    ],
-                    "show": false
-                },
                 "showHeader": true
             },
             "targets": [
@@ -467,45 +481,77 @@
                     "editorMode": "code",
                     "format": "table",
                     "rawQuery": true,
-                    "rawSql": "SELECT issue_id AS \"Defecto\", title AS \"Título\", status AS \"Estado\", workaround AS \"Workaround\" FROM known_issues ORDER BY CASE status WHEN 'OPEN' THEN 0 ELSE 1 END, issue_id;",
+                    "rawSql": "\n            SELECT\n                issue_id AS \"Defecto\",\n\n                title AS \"Título\",\n\n                status AS \"Estado\",\n\n                COALESCE(\n                    workaround,\n                    '-'\n                ) AS \"Workaround\"\n\n            FROM known_issues\n\n            ORDER BY\n                CASE\n                    WHEN status = 'OPEN'\n                        THEN 0\n                    ELSE 1\n                END,\n\n                issue_id;\n            ",
                     "refId": "A"
                 }
-            ],
-            "title": "Defectos conocidos",
-            "type": "table"
+            ]
+        },
+        {
+            "id": 15,
+            "title": "Escenarios definidos",
+            "type": "table",
+            "datasource": {
+                "type": "postgres",
+                "uid": "parex-postgres"
+            },
+            "gridPos": {
+                "x": 0,
+                "y": 34,
+                "w": 24,
+                "h": 11
+            },
+            "fieldConfig": {
+                "defaults": {},
+                "overrides": []
+            },
+            "options": {
+                "cellHeight": "sm",
+                "showHeader": true
+            },
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "postgres",
+                        "uid": "parex-postgres"
+                    },
+                    "editorMode": "code",
+                    "format": "table",
+                    "rawQuery": true,
+                    "rawSql": "\n            SELECT\n                d.test_id AS \"ID\",\n\n                COALESCE(\n                    d.use_case_id,\n                    d.capability,\n                    '-'\n                ) AS \"Contexto\",\n\n                d.name AS \"Escenario\",\n\n                UPPER(\n                    d.kind\n                ) AS \"Tipo\",\n\n                UPPER(\n                    d.risk_level\n                ) AS \"Riesgo\",\n\n                UPPER(\n                    d.catalog_status\n                ) AS \"Automatización\",\n\n                COALESCE(\n                    (\n                        SELECT\n                            string_agg(\n                                x.value,\n                                ', '\n                            )\n                        FROM\n                            jsonb_array_elements_text(\n                                d.suites\n                            ) AS x(value)\n                    ),\n                    '-'\n                ) AS \"Suites\"\n\n            FROM test_definitions d\n\n            WHERE\n                d.is_present = TRUE\n                AND d.count_as_scenario = TRUE\n                AND d.allowed_environments\n                    ? LOWER('${environment}')\n\n            ORDER BY\n                COALESCE(\n                    d.use_case_id,\n                    d.capability,\n                    ''\n                ),\n\n                d.sequence,\n\n                d.test_id;\n            ",
+                    "refId": "A"
+                }
+            ]
         }
     ],
     "refresh": "10s",
     "schemaVersion": 39,
     "tags": [
         "parex",
-        "playwright",
-        "validation"
+        "validation",
+        "semantic",
+        "observability"
     ],
     "templating": {
         "list": [
             {
+                "name": "environment",
+                "label": "Ambiente",
+                "type": "query",
+                "datasource": {
+                    "type": "postgres",
+                    "uid": "parex-postgres"
+                },
+                "definition": "",
+                "query": "SELECT DISTINCT UPPER(env.value) AS __text, UPPER(env.value) AS __value FROM test_definitions d CROSS JOIN LATERAL jsonb_array_elements_text(d.allowed_environments) AS env(value) WHERE d.is_present = TRUE ORDER BY 1;",
+                "refresh": 1,
+                "includeAll": false,
+                "multi": false,
                 "current": {
                     "selected": true,
                     "text": "DEV",
                     "value": "DEV"
                 },
-                "datasource": {
-                    "type": "postgres",
-                    "uid": "parex-postgres"
-                },
-                "definition": "SELECT DISTINCT environment FROM test_runs ORDER BY environment;",
-                "hide": 0,
-                "includeAll": false,
-                "label": "Ambiente",
-                "multi": false,
-                "name": "environment",
-                "options": [],
-                "query": "SELECT DISTINCT environment FROM test_runs ORDER BY environment;",
-                "refresh": 1,
-                "regex": "",
-                "skipUrlSync": false,
-                "type": "query"
+                "options": []
             }
         ]
     },
@@ -513,9 +559,8 @@
         "from": "now-30d",
         "to": "now"
     },
-    "timepicker": {},
     "timezone": "browser",
-    "title": "PAREX · Automated Validation",
+    "title": "PAREX · Cobertura y Ejecución",
     "uid": "parex-validation",
     "version": 1,
     "weekStart": ""

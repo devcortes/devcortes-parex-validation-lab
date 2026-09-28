@@ -1,0 +1,396 @@
+{
+    "annotations": {
+        "list": []
+    },
+    "editable": true,
+    "fiscalYearStartMonth": 0,
+    "graphTooltip": 1,
+    "id": null,
+    "links": [],
+    "liveNow": false,
+    "panels": [
+        {
+            "id": 1,
+            "title": "Último resultado",
+            "type": "stat",
+            "datasource": {
+                "type": "postgres",
+                "uid": "parex-postgres"
+            },
+            "gridPos": {
+                "x": 0,
+                "y": 0,
+                "w": 6,
+                "h": 5
+            },
+            "fieldConfig": {
+                "defaults": {},
+                "overrides": []
+            },
+            "options": {
+                "colorMode": "value",
+                "graphMode": "none",
+                "justifyMode": "auto",
+                "orientation": "auto",
+                "reduceOptions": {
+                    "calcs": [],
+                    "fields": "/.*/",
+                    "values": true,
+                    "limit": 1
+                },
+                "textMode": "value"
+            },
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "postgres",
+                        "uid": "parex-postgres"
+                    },
+                    "editorMode": "code",
+                    "format": "table",
+                    "rawQuery": true,
+                    "rawSql": "\n            SELECT\n                v.status AS \"Estado\"\n\n            FROM vw_parex_test_results_semantic v\n\n            JOIN test_runs tr\n                ON tr.run_id = v.run_id\n\n            WHERE\n                v.test_id = '${scenario}'\n                AND v.environment = '${environment}'\n\n            ORDER BY\n                tr.started_at DESC\n\n            LIMIT 1;\n            ",
+                    "refId": "A"
+                }
+            ]
+        },
+        {
+            "id": 2,
+            "title": "Última duración",
+            "type": "stat",
+            "datasource": {
+                "type": "postgres",
+                "uid": "parex-postgres"
+            },
+            "gridPos": {
+                "x": 6,
+                "y": 0,
+                "w": 6,
+                "h": 5
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "s"
+                },
+                "overrides": []
+            },
+            "options": {
+                "colorMode": "value",
+                "graphMode": "none",
+                "justifyMode": "auto",
+                "orientation": "auto",
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "textMode": "auto"
+            },
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "postgres",
+                        "uid": "parex-postgres"
+                    },
+                    "editorMode": "code",
+                    "format": "table",
+                    "rawQuery": true,
+                    "rawSql": "\n            SELECT\n                ROUND(\n                    v.duration_ms / 1000.0,\n                    2\n                ) AS \"Segundos\"\n\n            FROM vw_parex_test_results_semantic v\n\n            JOIN test_runs tr\n                ON tr.run_id = v.run_id\n\n            WHERE\n                v.test_id = '${scenario}'\n                AND v.environment = '${environment}'\n\n            ORDER BY\n                tr.started_at DESC\n\n            LIMIT 1;\n            ",
+                    "refId": "A"
+                }
+            ]
+        },
+        {
+            "id": 3,
+            "title": "Nivel de riesgo",
+            "type": "stat",
+            "datasource": {
+                "type": "postgres",
+                "uid": "parex-postgres"
+            },
+            "gridPos": {
+                "x": 12,
+                "y": 0,
+                "w": 6,
+                "h": 5
+            },
+            "fieldConfig": {
+                "defaults": {},
+                "overrides": []
+            },
+            "options": {
+                "colorMode": "value",
+                "graphMode": "none",
+                "justifyMode": "auto",
+                "orientation": "auto",
+                "reduceOptions": {
+                    "calcs": [],
+                    "fields": "/.*/",
+                    "values": true,
+                    "limit": 1
+                },
+                "textMode": "value"
+            },
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "postgres",
+                        "uid": "parex-postgres"
+                    },
+                    "editorMode": "code",
+                    "format": "table",
+                    "rawQuery": true,
+                    "rawSql": "\n            SELECT\n                UPPER(\n                    risk_level\n                ) AS \"Riesgo\"\n\n            FROM test_definitions\n\n            WHERE\n                test_id = '${scenario}';\n            ",
+                    "refId": "A"
+                }
+            ]
+        },
+        {
+            "id": 4,
+            "title": "Contexto funcional",
+            "type": "stat",
+            "datasource": {
+                "type": "postgres",
+                "uid": "parex-postgres"
+            },
+            "gridPos": {
+                "x": 18,
+                "y": 0,
+                "w": 6,
+                "h": 5
+            },
+            "fieldConfig": {
+                "defaults": {},
+                "overrides": []
+            },
+            "options": {
+                "colorMode": "value",
+                "graphMode": "none",
+                "justifyMode": "auto",
+                "orientation": "auto",
+                "reduceOptions": {
+                    "calcs": [],
+                    "fields": "/.*/",
+                    "values": true,
+                    "limit": 1
+                },
+                "textMode": "value"
+            },
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "postgres",
+                        "uid": "parex-postgres"
+                    },
+                    "editorMode": "code",
+                    "format": "table",
+                    "rawQuery": true,
+                    "rawSql": "\n            SELECT\n                COALESCE(\n                    use_case_id,\n                    capability,\n                    '-'\n                ) AS \"Contexto\"\n\n            FROM test_definitions\n\n            WHERE\n                test_id = '${scenario}';\n            ",
+                    "refId": "A"
+                }
+            ]
+        },
+        {
+            "id": 10,
+            "title": "Definición funcional",
+            "type": "table",
+            "datasource": {
+                "type": "postgres",
+                "uid": "parex-postgres"
+            },
+            "gridPos": {
+                "x": 0,
+                "y": 5,
+                "w": 24,
+                "h": 8
+            },
+            "fieldConfig": {
+                "defaults": {},
+                "overrides": []
+            },
+            "options": {
+                "cellHeight": "sm",
+                "showHeader": true
+            },
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "postgres",
+                        "uid": "parex-postgres"
+                    },
+                    "editorMode": "code",
+                    "format": "table",
+                    "rawQuery": true,
+                    "rawSql": "\n            SELECT\n                d.test_id AS \"ID\",\n\n                d.name AS \"Nombre\",\n\n                CASE\n                    WHEN d.use_case_id IS NOT NULL\n                        THEN\n                            d.use_case_id ||\n                            ' · ' ||\n                            d.use_case_name\n                    ELSE\n                        COALESCE(\n                            d.capability,\n                            '-'\n                        )\n                END AS \"Contexto\",\n\n                d.objective AS \"Objetivo\",\n\n                UPPER(\n                    d.risk_level\n                ) AS \"Riesgo\",\n\n                d.risk_description AS \"Riesgo cubierto\"\n\n            FROM test_definitions d\n\n            WHERE\n                d.test_id = '${scenario}';\n            ",
+                    "refId": "A"
+                }
+            ]
+        },
+        {
+            "id": 11,
+            "title": "Dado · Cuando · Entonces",
+            "type": "table",
+            "datasource": {
+                "type": "postgres",
+                "uid": "parex-postgres"
+            },
+            "gridPos": {
+                "x": 0,
+                "y": 13,
+                "w": 24,
+                "h": 9
+            },
+            "fieldConfig": {
+                "defaults": {},
+                "overrides": []
+            },
+            "options": {
+                "cellHeight": "sm",
+                "showHeader": true
+            },
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "postgres",
+                        "uid": "parex-postgres"
+                    },
+                    "editorMode": "code",
+                    "format": "table",
+                    "rawQuery": true,
+                    "rawSql": "\n            SELECT\n                'DADO' AS \"Etapa\",\n\n                COALESCE(\n                    (\n                        SELECT\n                            string_agg(\n                                '• ' || x.value,\n                                E'\\n'\n                            )\n                        FROM\n                            jsonb_array_elements_text(\n                                d.given_steps\n                            ) AS x(value)\n                    ),\n                    '-'\n                ) AS \"Descripción\"\n\n            FROM test_definitions d\n\n            WHERE\n                d.test_id = '${scenario}'\n\n            UNION ALL\n\n            SELECT\n                'CUANDO',\n\n                COALESCE(\n                    (\n                        SELECT\n                            string_agg(\n                                '• ' || x.value,\n                                E'\\n'\n                            )\n                        FROM\n                            jsonb_array_elements_text(\n                                d.when_steps\n                            ) AS x(value)\n                    ),\n                    '-'\n                )\n\n            FROM test_definitions d\n\n            WHERE\n                d.test_id = '${scenario}'\n\n            UNION ALL\n\n            SELECT\n                'ENTONCES',\n\n                COALESCE(\n                    (\n                        SELECT\n                            string_agg(\n                                '• ' || x.value,\n                                E'\\n'\n                            )\n                        FROM\n                            jsonb_array_elements_text(\n                                d.then_steps\n                            ) AS x(value)\n                    ),\n                    '-'\n                )\n\n            FROM test_definitions d\n\n            WHERE\n                d.test_id = '${scenario}';\n            ",
+                    "refId": "A"
+                }
+            ]
+        },
+        {
+            "id": 12,
+            "title": "Arquitectura y clasificación",
+            "type": "table",
+            "datasource": {
+                "type": "postgres",
+                "uid": "parex-postgres"
+            },
+            "gridPos": {
+                "x": 0,
+                "y": 22,
+                "w": 24,
+                "h": 7
+            },
+            "fieldConfig": {
+                "defaults": {},
+                "overrides": []
+            },
+            "options": {
+                "cellHeight": "sm",
+                "showHeader": true
+            },
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "postgres",
+                        "uid": "parex-postgres"
+                    },
+                    "editorMode": "code",
+                    "format": "table",
+                    "rawQuery": true,
+                    "rawSql": "\n            SELECT\n                COALESCE(\n                    (\n                        SELECT\n                            string_agg(\n                                x.value,\n                                ', '\n                            )\n                        FROM\n                            jsonb_array_elements_text(\n                                d.architecture\n                            ) AS x(value)\n                    ),\n                    '-'\n                ) AS \"Arquitectura\",\n\n                COALESCE(\n                    (\n                        SELECT\n                            string_agg(\n                                x.value,\n                                ', '\n                            )\n                        FROM\n                            jsonb_array_elements_text(\n                                d.tags\n                            ) AS x(value)\n                    ),\n                    '-'\n                ) AS \"Tags\",\n\n                COALESCE(\n                    (\n                        SELECT\n                            string_agg(\n                                x.value,\n                                ', '\n                            )\n                        FROM\n                            jsonb_array_elements_text(\n                                d.suites\n                            ) AS x(value)\n                    ),\n                    '-'\n                ) AS \"Suites\",\n\n                d.automation_project\n                    AS \"Proyecto\",\n\n                d.automation_spec\n                    AS \"Automatización\"\n\n            FROM test_definitions d\n\n            WHERE\n                d.test_id = '${scenario}';\n            ",
+                    "refId": "A"
+                }
+            ]
+        },
+        {
+            "id": 13,
+            "title": "Histórico de ejecuciones",
+            "type": "table",
+            "datasource": {
+                "type": "postgres",
+                "uid": "parex-postgres"
+            },
+            "gridPos": {
+                "x": 0,
+                "y": 29,
+                "w": 24,
+                "h": 10
+            },
+            "fieldConfig": {
+                "defaults": {},
+                "overrides": []
+            },
+            "options": {
+                "cellHeight": "sm",
+                "showHeader": true
+            },
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "postgres",
+                        "uid": "parex-postgres"
+                    },
+                    "editorMode": "code",
+                    "format": "table",
+                    "rawQuery": true,
+                    "rawSql": "\n            SELECT\n                tr.started_at AS \"Fecha\",\n\n                v.status AS \"Estado\",\n\n                ROUND(\n                    v.duration_ms / 1000.0,\n                    2\n                ) AS \"Duración (s)\",\n\n                CASE\n                    WHEN v.has_workaround\n                        THEN 'SI'\n                    ELSE 'NO'\n                END AS \"Workaround\",\n\n                COALESCE(\n                    v.known_issue,\n                    '-'\n                ) AS \"Defecto\",\n\n                COALESCE(\n                    v.error_message,\n                    '-'\n                ) AS \"Error\"\n\n            FROM vw_parex_test_results_semantic v\n\n            JOIN test_runs tr\n                ON tr.run_id = v.run_id\n\n            WHERE\n                v.test_id = '${scenario}'\n                AND v.environment = '${environment}'\n\n            ORDER BY\n                tr.started_at DESC;\n            ",
+                    "refId": "A"
+                }
+            ]
+        }
+    ],
+    "refresh": "10s",
+    "schemaVersion": 39,
+    "tags": [
+        "parex",
+        "validation",
+        "semantic",
+        "observability"
+    ],
+    "templating": {
+        "list": [
+            {
+                "name": "environment",
+                "label": "Ambiente",
+                "type": "query",
+                "datasource": {
+                    "type": "postgres",
+                    "uid": "parex-postgres"
+                },
+                "definition": "",
+                "query": "SELECT DISTINCT UPPER(env.value) AS __text, UPPER(env.value) AS __value FROM test_definitions d CROSS JOIN LATERAL jsonb_array_elements_text(d.allowed_environments) AS env(value) WHERE d.is_present = TRUE ORDER BY 1;",
+                "refresh": 1,
+                "includeAll": false,
+                "multi": false,
+                "current": {
+                    "selected": true,
+                    "text": "DEV",
+                    "value": "DEV"
+                },
+                "options": []
+            },
+            {
+                "name": "scenario",
+                "label": "Escenario",
+                "type": "query",
+                "datasource": {
+                    "type": "postgres",
+                    "uid": "parex-postgres"
+                },
+                "definition": "",
+                "query": "SELECT d.test_id || ' · ' || d.name AS __text, d.test_id AS __value FROM test_definitions d WHERE d.is_present = TRUE AND d.count_as_scenario = TRUE AND d.allowed_environments ? LOWER('${environment}') ORDER BY COALESCE(d.use_case_id, d.capability), d.sequence, d.test_id;",
+                "refresh": 1,
+                "includeAll": false,
+                "multi": false,
+                "options": []
+            }
+        ]
+    },
+    "time": {
+        "from": "now-30d",
+        "to": "now"
+    },
+    "timezone": "browser",
+    "title": "PAREX · Detalle de Escenario",
+    "uid": "parex-scenario-detail",
+    "version": 1,
+    "weekStart": ""
+}

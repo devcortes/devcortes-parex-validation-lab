@@ -10,7 +10,9 @@
     "obs:down": "docker compose -f infrastructure/observability/docker-compose.yml down",
     "obs:ps": "docker compose -f infrastructure/observability/docker-compose.yml ps",
     "parex:catalog": "tsx scripts/validate-catalog.ts",
-    "parex": "tsx scripts/parex.ts"
+    "parex": "tsx scripts/parex.ts",
+    "parex:catalog:sync": "tsx scripts/sync-catalog.ts",
+    "parex:grafana:build": "tsx scripts/build-grafana-dashboard.ts"
   },
   "keywords": [],
   "author": "",
