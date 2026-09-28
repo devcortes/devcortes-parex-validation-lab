@@ -1,0 +1,96 @@
+schema_version: 1
+
+id: EUV-UC3-002
+name: Completar información del inversionista y avanzar a documentos
+
+kind: euv
+status: automated
+
+environment:
+  allowed:
+    - dev
+  default: dev
+
+use_case:
+  id: UC3
+  name: Adquirir CDT
+
+objective: >
+  Validar que el inversionista puede registrar la información personal
+  y financiera requerida para la adquisición y avanzar a la etapa de
+  documentación.
+
+scenario:
+  given:
+    - Existe un proceso de adquisición iniciado.
+    - El inversionista tiene una sesión autenticada.
+    - El proceso se encuentra en la etapa de formulario.
+  when:
+    - El inversionista diligencia la información personal requerida.
+    - El inversionista diligencia la información económica y financiera.
+    - El inversionista envía el formulario.
+  then:
+    - La información es aceptada por el sistema.
+    - El proceso abandona la etapa de formulario.
+    - El proceso avanza a la etapa de documentos.
+
+risk:
+  level: critical
+  description: >
+    Evitar que una adquisición avance sin la información necesaria para
+    identificar, caracterizar y evaluar al inversionista.
+
+coverage:
+  count_as_scenario: true
+
+automation:
+  framework: playwright
+  project: portal
+  spec: tests/euv/uc3/EUV-UC3-002.portal.spec.ts
+
+preconditions:
+  - PRE-DEV-AUTH-001
+  - EUV-UC3-001
+
+testability_contract:
+  - process-form
+  - process-form-full-name
+  - process-form-birth-date
+  - process-form-document-type
+  - process-form-document-number
+  - process-form-phone
+  - process-form-city
+  - process-form-address
+  - process-form-occupation
+  - process-form-economic-activity
+  - process-form-monthly-income
+  - process-form-monthly-expenses
+  - process-form-total-assets
+  - process-form-total-liabilities
+  - process-form-source-of-funds
+  - process-form-submit
+  - process-stage-documents
+
+evidence:
+  - execution-result
+  - duration
+  - screenshot-on-failure
+  - video-on-failure
+  - trace-on-failure
+
+tags:
+  - uc3
+  - acquisition
+  - investor-data
+  - form
+
+suites:
+  - regression
+  - critical
+
+architecture:
+  - portal-spa
+  - processes-api
+  - forms-api
+
+sequence: 2

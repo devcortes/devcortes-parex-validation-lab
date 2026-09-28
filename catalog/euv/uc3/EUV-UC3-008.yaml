@@ -1,0 +1,86 @@
+schema_version: 1
+
+id: EUV-UC3-008
+name: Aceptar términos y solicitar código OTP
+
+kind: euv
+status: automated
+
+environment:
+  allowed:
+    - dev
+  default: dev
+
+use_case:
+  id: UC3
+  name: Adquirir CDT
+
+objective: >
+  Validar que el consentimiento explícito del inversionista queda
+  registrado y que el sistema solicita el segundo factor requerido
+  para continuar con la firma.
+
+scenario:
+  given:
+    - Existe una ceremonia con identidad validada.
+    - La firma manuscrita fue registrada.
+    - La ceremonia se encuentra en la etapa de consentimiento.
+  when:
+    - El inversionista acepta los términos de la ceremonia.
+  then:
+    - El consentimiento queda registrado.
+    - El sistema solicita un código OTP.
+    - La ceremonia avanza a la etapa OTP.
+    - El estado indica que el OTP fue solicitado.
+
+risk:
+  level: critical
+  description: >
+    Evitar que una firma avance sin consentimiento explícito o sin
+    activar el segundo factor de confirmación requerido por el flujo.
+
+coverage:
+  count_as_scenario: true
+
+automation:
+  framework: playwright
+  project: portal
+  spec: tests/euv/uc3/EUV-UC3-008.portal.spec.ts
+
+preconditions:
+  - PRE-DEV-AUTH-001
+  - EUV-UC3-007
+  - SIGNATURES_TEST_FACE_PATH
+
+testability_contract:
+  - signing-e2e-hook
+  - consent
+  - otp
+
+evidence:
+  - execution-result
+  - duration
+  - screenshot
+  - screenshot-on-failure
+  - video-on-failure
+  - trace-on-failure
+  - json-state
+
+tags:
+  - uc3
+  - signing
+  - consent
+  - otp
+  - security
+
+suites:
+  - regression
+  - critical
+  - signing
+
+architecture:
+  - signing-spa
+  - signatures-api
+  - request-otp
+
+sequence: 8

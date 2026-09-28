@@ -1,0 +1,17 @@
+id: regression
+name: Regression
+
+description: >
+  Conjunto de escenarios automatizados utilizados para comprobar que
+  comportamientos previamente validados continúan funcionando después
+  de cambios en el producto.
+
+purpose: >
+  Identificar regresiones funcionales en capacidades que ya cuentan
+  con una expectativa observable y automatizada.
+
+execution:
+  order: 20
+
+tags:
+  - regression

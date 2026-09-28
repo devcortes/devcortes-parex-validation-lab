@@ -1,0 +1,74 @@
+schema_version: 1
+
+id: PRE-DEV-AUTH-001
+name: Usuario de pruebas válido y autenticable
+
+kind: precondition
+status: automated
+
+environment:
+  allowed:
+    - dev
+  default: dev
+
+capability: authentication
+
+objective: >
+  Verificar que las credenciales técnicas utilizadas por la automatización
+  permiten establecer una sesión válida antes de ejecutar escenarios que
+  dependen de un usuario autenticado.
+
+scenario:
+  given:
+    - Existe un usuario de pruebas configurado para el ambiente DEV.
+    - Las credenciales se encuentran disponibles únicamente en la configuración local de ejecución.
+  when:
+    - La preparación de Playwright intenta autenticarse con las credenciales configuradas.
+  then:
+    - El sistema establece una sesión autenticada.
+    - El estado de autenticación se persiste para los escenarios dependientes.
+    - Los escenarios del proyecto portal pueden reutilizar la sesión preparada.
+
+risk:
+  level: high
+  description: >
+    Evitar interpretar como defectos funcionales fallos producidos porque
+    la cuenta de automatización no existe, está bloqueada o utiliza
+    credenciales inválidas.
+
+coverage:
+  count_as_scenario: false
+
+automation:
+  framework: playwright
+  project: setup
+  spec: tests/auth.setup.ts
+  runtime_id_template: 'PRE-${target.toUpperCase()}-AUTH-001'
+
+preconditions: []
+
+testability_contract:
+  - login-email
+  - login-password
+  - portal-login-submit
+  - global-nav-account
+  - global-nav-logout
+
+evidence:
+  - execution-result
+  - duration
+  - screenshot-on-failure
+  - trace-on-failure
+
+tags:
+  - auth
+  - setup
+  - precondition
+
+suites: []
+
+architecture:
+  - portal-spa
+  - authentication-api
+
+sequence: 0

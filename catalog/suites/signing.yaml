@@ -1,0 +1,17 @@
+id: signing
+name: Signing
+
+description: >
+  Conjunto especializado en el recorrido de firma del caso de uso UC3,
+  desde la transición hacia firma hasta la confirmación OTP.
+
+purpose: >
+  Validar como una unidad funcional el flujo de ceremonia, identidad,
+  firma manuscrita, consentimiento y segundo factor.
+
+execution:
+  order: 40
+
+tags:
+  - signing
+  - uc3

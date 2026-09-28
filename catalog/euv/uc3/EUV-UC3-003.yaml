@@ -1,0 +1,85 @@
+schema_version: 1
+
+id: EUV-UC3-003
+name: Registrar la documentación requerida de una adquisición
+
+kind: euv
+status: automated
+
+environment:
+  allowed:
+    - dev
+  default: dev
+
+use_case:
+  id: UC3
+  name: Adquirir CDT
+
+objective: >
+  Validar que el inversionista puede cargar la documentación requerida
+  y que el sistema registra de manera observable el archivo dentro del
+  proceso de adquisición.
+
+scenario:
+  given:
+    - Existe un proceso de adquisición en etapa de documentos.
+    - El inversionista tiene una sesión autenticada.
+  when:
+    - El inversionista selecciona un documento permitido.
+    - El inversionista solicita cargar el documento.
+  then:
+    - El archivo es aceptado por el sistema.
+    - El documento aparece registrado dentro del proceso.
+    - El documento queda disponible para las acciones posteriores del flujo.
+
+risk:
+  level: high
+  description: >
+    Evitar que el proceso continúe sin evidencia documental registrada
+    o que un archivo aparentemente cargado no quede asociado realmente
+    a la adquisición.
+
+coverage:
+  count_as_scenario: true
+
+automation:
+  framework: playwright
+  project: portal
+  spec: tests/euv/uc3/EUV-UC3-003.portal.spec.ts
+
+preconditions:
+  - PRE-DEV-AUTH-001
+  - EUV-UC3-002
+
+testability_contract:
+  - process-stage-documents
+  - process-documents-upload
+  - process-documents-input
+  - process-documents-progress
+  - process-documents-file
+  - process-documents-actions
+  - process-documents-view
+  - process-documents-error
+
+evidence:
+  - execution-result
+  - duration
+  - screenshot-on-failure
+  - video-on-failure
+  - trace-on-failure
+
+tags:
+  - uc3
+  - acquisition
+  - documents
+  - evidence
+
+suites:
+  - regression
+
+architecture:
+  - portal-spa
+  - processes-api
+  - files-api
+
+sequence: 3

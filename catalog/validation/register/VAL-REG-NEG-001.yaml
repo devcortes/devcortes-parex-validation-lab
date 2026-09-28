@@ -1,0 +1,79 @@
+schema_version: 1
+
+id: VAL-REG-NEG-001
+name: No permite registrar dos cuentas con el mismo correo
+
+kind: validation
+status: automated
+
+environment:
+  allowed:
+    - dev
+    - pro
+  default: dev
+
+capability: registration
+
+objective: >
+  Demostrar que el sistema protege la unicidad de la cuenta
+  y rechaza de manera observable un intento de registrar nuevamente
+  un correo que ya se encuentra asociado a un usuario.
+
+scenario:
+  given:
+    - Existe una cuenta registrada con un correo determinado.
+    - La pantalla de registro está disponible.
+  when:
+    - Se intenta registrar una nueva cuenta utilizando el mismo correo.
+    - Se completa la información requerida.
+    - Se solicita crear la cuenta.
+  then:
+    - El registro es rechazado.
+    - Se presenta un mensaje observable indicando que el correo ya está registrado.
+    - No se crea una segunda cuenta con el mismo correo.
+
+risk:
+  level: high
+  description: >
+    Evitar cuentas duplicadas que puedan producir inconsistencias
+    de identidad, autenticación o asociación de procesos de inversión.
+
+coverage:
+  count_as_scenario: true
+
+automation:
+  framework: playwright
+  project: public
+  spec: tests/validation/register/VAL-REG-NEG-001.public.spec.ts
+
+preconditions: []
+
+testability_contract:
+  - portal-register-form
+  - register-name
+  - register-email
+  - register-password
+  - portal-register-submit
+  - portal-register-error
+
+evidence:
+  - execution-result
+  - duration
+  - screenshot-on-failure
+  - video-on-failure
+  - trace-on-failure
+
+tags:
+  - registration
+  - negative
+  - identity
+
+suites:
+  - regression
+  - critical
+
+architecture:
+  - portal-spa
+  - authentication-api
+
+sequence: 3

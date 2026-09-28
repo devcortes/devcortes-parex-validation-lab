@@ -1,0 +1,93 @@
+schema_version: 1
+
+id: EUV-UC3-009
+name: Confirmar OTP e iniciar el firmado del documento
+
+kind: euv
+status: automated
+
+environment:
+  allowed:
+    - dev
+  default: dev
+
+use_case:
+  id: UC3
+  name: Adquirir CDT
+
+objective: >
+  Validar que el segundo factor OTP confirma la voluntad del inversionista
+  y permite iniciar el procesamiento de firma del documento.
+
+scenario:
+  given:
+    - Existe una ceremonia de firma vigente.
+    - La identidad del inversionista fue validada.
+    - La firma manuscrita fue registrada.
+    - El consentimiento fue aceptado.
+    - Existe un OTP vigente.
+    - La compuerta de automatización OTP de DEV está disponible para la ejecución.
+  when:
+    - El inversionista confirma el código OTP vigente.
+  then:
+    - El código OTP es aceptado.
+    - La ceremonia abandona la etapa OTP.
+    - La ceremonia inicia el procesamiento de firma del documento.
+
+risk:
+  level: critical
+  description: >
+    Evitar que una ceremonia pueda iniciar el procesamiento de firma
+    sin demostrar correctamente el segundo factor asociado a la
+    voluntad del inversionista.
+
+coverage:
+  count_as_scenario: true
+
+automation:
+  framework: playwright
+  project: portal
+  spec: tests/euv/uc3/EUV-UC3-009.portal.spec.ts
+
+preconditions:
+  - PRE-DEV-AUTH-001
+  - EUV-UC3-008
+  - SIGNATURES_TEST_FACE_PATH
+  - DEBUG_OTP_KEY_HEX
+
+testability_contract:
+  - signing-e2e-hook
+  - X-Debug-OTP-Signature
+  - debug-otp-gate
+  - otp
+  - signing
+
+evidence:
+  - execution-result
+  - duration
+  - screenshot
+  - screenshot-on-failure
+  - video-on-failure
+  - trace-on-failure
+  - json-state
+
+tags:
+  - uc3
+  - signing
+  - otp
+  - security
+  - critical-path
+
+suites:
+  - regression
+  - critical
+  - signing
+
+architecture:
+  - signing-spa
+  - signatures-api
+  - request-otp
+  - verify-otp
+  - aws-ssm
+
+sequence: 9

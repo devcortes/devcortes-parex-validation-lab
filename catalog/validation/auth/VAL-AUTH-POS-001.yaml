@@ -1,37 +1,54 @@
+schema_version: 1
+
 id: VAL-AUTH-POS-001
+name: Credenciales válidas establecen una sesión autenticada
 
-title: Credenciales válidas establecen una sesión autenticada
-
-type: functional-validation
-
-capability: authentication
+kind: validation
+status: automated
 
 environment:
   allowed:
     - dev
     - pro
+  default: dev
 
-purpose: >
+capability: authentication
+
+objective: >
   Demostrar que un usuario con credenciales válidas puede autenticarse
   y que la interfaz refleja de manera observable el estado autenticado.
 
-preconditions:
-  - Usuario de pruebas existente en el ambiente objetivo.
-  - Credenciales válidas configuradas para el ambiente.
+scenario:
+  given:
+    - El usuario se encuentra en la pantalla de inicio de sesión.
+    - El usuario no tiene una sesión autenticada activa.
+    - Existen credenciales válidas para el ambiente objetivo.
+  when:
+    - El usuario ingresa un correo válido.
+    - El usuario ingresa una contraseña válida.
+    - El usuario solicita iniciar sesión.
+  then:
+    - El control "Mi cuenta" está disponible.
+    - El control "Salir" está disponible.
+    - El control "Iniciar sesión" deja de estar disponible.
+    - La navegación refleja una sesión autenticada.
 
-given:
-  - El usuario se encuentra en la pantalla de inicio de sesión.
-  - El usuario no tiene una sesión autenticada activa.
+risk:
+  level: high
+  description: >
+    Evitar que usuarios con credenciales válidas queden sin acceso
+    al portal o que la interfaz no refleje correctamente el estado
+    autenticado después del inicio de sesión.
 
-when:
-  - Ingresa un correo válido.
-  - Ingresa una contraseña válida.
-  - Solicita iniciar sesión.
+coverage:
+  count_as_scenario: true
 
-then:
-  - El control "Mi cuenta" está disponible.
-  - El control "Salir" está disponible.
-  - El control "Iniciar sesión" deja de estar disponible.
+automation:
+  framework: playwright
+  project: public
+  spec: tests/validation/auth/VAL-AUTH-POS-001.public.spec.ts
+
+preconditions: []
 
 testability_contract:
   - login-email
@@ -43,15 +60,22 @@ testability_contract:
 
 evidence:
   - execution-result
-  - screenshot
   - duration
-
-automation:
-  framework: playwright
-  project: public
-  spec: tests/validation/auth/VAL-AUTH-POS-001.public.spec.ts
+  - screenshot-on-failure
+  - video-on-failure
+  - trace-on-failure
 
 tags:
   - auth
   - positive
+  - security
+
+suites:
   - smoke
+  - regression
+
+architecture:
+  - portal-spa
+  - authentication-api
+
+sequence: 1
