@@ -1033,7 +1033,7 @@ function printSuccess(
         '=========================================='
     );
     console.log(
-        ' PAREX Semantic Catalog'
+        ' PAREX · Catálogo'
     );
     console.log(
         '=========================================='
@@ -1153,7 +1153,7 @@ function main(): void {
             '=========================================='
         );
         console.error(
-            ' PAREX Semantic Catalog'
+            ' PAREX · Catálogo'
         );
         console.error(
             '=========================================='
