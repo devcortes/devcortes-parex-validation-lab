@@ -9,7 +9,8 @@
     "obs:up": "docker compose -f infrastructure/observability/docker-compose.yml up -d",
     "obs:down": "docker compose -f infrastructure/observability/docker-compose.yml down",
     "obs:ps": "docker compose -f infrastructure/observability/docker-compose.yml ps",
-    "parex:catalog": "tsx scripts/validate-catalog.ts"
+    "parex:catalog": "tsx scripts/validate-catalog.ts",
+    "parex": "tsx scripts/parex.ts"
   },
   "keywords": [],
   "author": "",
