@@ -452,7 +452,7 @@
         },
         {
             "id": 14,
-            "title": "Defectos conocidos",
+            "title": "Hallazgos registrados",
             "type": "table",
             "datasource": {
                 "type": "postgres",
@@ -481,7 +481,7 @@
                     "editorMode": "code",
                     "format": "table",
                     "rawQuery": true,
-                    "rawSql": "\n            SELECT\n                issue_id AS \"Defecto\",\n\n                title AS \"Título\",\n\n                status AS \"Estado\",\n\n                COALESCE(\n                    workaround,\n                    '-'\n                ) AS \"Workaround\"\n\n            FROM known_issues\n\n            ORDER BY\n                CASE\n                    WHEN status = 'OPEN'\n                        THEN 0\n                    ELSE 1\n                END,\n\n                issue_id;\n            ",
+                    "rawSql": "\n            SELECT\n                issue_id AS \"Defecto\",\n\n                title AS \"Título\",\n\n                status AS \"Estado\",\n\n                COALESCE(\n                    workaround,\n                    '-'\n                ) AS \"Workaround\"\n\n            FROM known_issues\n\n            WHERE\n                is_present = TRUE\n\n            ORDER BY\n                CASE\n                    WHEN status = 'OPEN'\n                        THEN 0\n                    ELSE 1\n                END,\n\n                issue_id;\n            ",
                     "refId": "A"
                 }
             ]

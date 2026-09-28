@@ -215,12 +215,27 @@ function scenarioYamlFiles():
                 )
         )
         .filter(
-            (filePath) =>
-                !normalizePath(
-                    filePath
-                ).includes(
-                    '/catalog/suites/'
-                )
+            (filePath) => {
+                const relative =
+                    normalizePath(
+                        path.relative(
+                            ROOT,
+                            filePath
+                        )
+                    );
+
+                return (
+                    relative.startsWith(
+                        'catalog/euv/'
+                    ) ||
+                    relative.startsWith(
+                        'catalog/validation/'
+                    ) ||
+                    relative.startsWith(
+                        'catalog/preconditions/'
+                    )
+                );
+            }
         )
         .sort();
 }

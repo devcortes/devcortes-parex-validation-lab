@@ -1,0 +1,61 @@
+id: DEF-SIGN-HMAC-001
+
+title: Frontend y backend utilizaban representaciones diferentes de la llave HMAC
+
+status: resolved
+severity: critical
+
+discovered_by:
+  - EUV-UC3-009
+
+related_scenarios:
+  - EUV-UC3-009
+
+component:
+  - signing-spa
+  - signatures-api
+  - aws-ssm
+  - request-otp
+
+description: >
+  La llave de autorización OTP almacenada en AWS SSM es una cadena
+  hexadecimal de 64 caracteres.
+
+  El backend calculaba HMAC-SHA256 utilizando los bytes de esa cadena
+  textual. El frontend, en cambio, interpretaba cada par hexadecimal
+  como un byte y construía una llave binaria de 32 bytes.
+
+  Por tanto, ambos componentes producían firmas diferentes aun cuando
+  recibían aparentemente la misma llave.
+
+impact: >
+  El header X-Debug-OTP-Signature generado por el frontend no podía
+  validarse correctamente en el backend y EUV-UC3-009 no podía completar
+  la confirmación OTP automatizada.
+
+root_cause: >
+  No existía un contrato explícito que definiera si la representación
+  hexadecimal debía utilizarse como texto o decodificarse antes de
+  calcular el HMAC.
+
+workaround: null
+
+resolution: >
+  El frontend fue ajustado para utilizar TextEncoder sobre la cadena
+  hexadecimal completa, igualando el comportamiento del backend.
+
+evidence:
+  type: automated-validation
+  source: playwright
+  notes: >
+    Después de alinear la codificación de la llave, EUV-UC3-009 pudo
+    completar el recorrido y el laboratorio obtuvo una ejecución
+    completa de 14 tests técnicos sin fallos.
+
+tags:
+  - uc3
+  - signing
+  - otp
+  - hmac
+  - security
+  - resolved

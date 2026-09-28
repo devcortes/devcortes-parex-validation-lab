@@ -1,0 +1,56 @@
+id: DEF-UC3-SIGN-001
+
+title: La transición a firma deja información de ceremonia desactualizada
+
+status: open
+severity: high
+
+discovered_by:
+  - EUV-UC3-005
+
+related_scenarios:
+  - EUV-UC3-004
+  - EUV-UC3-005
+  - EUV-UC3-006
+  - EUV-UC3-007
+  - EUV-UC3-008
+  - EUV-UC3-009
+
+component:
+  - portal-spa
+  - processes-api
+  - signatures-api
+
+description: >
+  Después de avanzar un proceso desde Documents hacia Signature,
+  la información utilizada por la interfaz para iniciar la ceremonia
+  puede permanecer desactualizada. Como consecuencia, la acción
+  "Firmar ahora" puede recibir una respuesta signature_required
+  antes de que el detalle necesario de la ceremonia quede disponible.
+
+impact: >
+  La transición funcional hacia firma puede aparentar estar completa,
+  pero el usuario no puede iniciar inmediatamente la ceremonia.
+
+root_cause: >
+  El estado mostrado por el portal no se refresca completamente después
+  de realizar el avance de etapa.
+
+workaround: >
+  Recargar la página una vez que el proceso se encuentra en Signature
+  antes de solicitar el inicio de la ceremonia.
+
+resolution: null
+
+evidence:
+  type: automated-validation
+  source: playwright
+  notes: >
+    Los escenarios posteriores a la transición utilizan actualmente
+    un reload explícito en prepareProcessAtSignatureStage.
+
+tags:
+  - uc3
+  - signing
+  - state-refresh
+  - known-issue
