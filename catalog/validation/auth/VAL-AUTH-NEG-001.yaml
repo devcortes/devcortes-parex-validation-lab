@@ -1,37 +1,55 @@
+schema_version: 1
+
 id: VAL-AUTH-NEG-001
+name: Credenciales inválidas producen un rechazo observable
 
-title: Credenciales inválidas producen un rechazo observable
-
-type: functional-validation
-
-capability: authentication
+kind: validation
+status: automated
 
 environment:
   allowed:
     - dev
     - pro
+  default: dev
 
-purpose: >
+capability: authentication
+
+objective: >
   Demostrar que el sistema rechaza credenciales inválidas,
   informa el rechazo de manera observable y no establece
   una sesión autenticada.
 
-preconditions:
-  - La pantalla de autenticación está disponible.
+scenario:
+  given:
+    - El usuario no se encuentra autenticado.
+    - La pantalla de autenticación está disponible.
+  when:
+    - El usuario ingresa un correo que no corresponde a un usuario válido.
+    - El usuario ingresa una contraseña inválida.
+    - El usuario solicita iniciar sesión.
+  then:
+    - Se presenta un mensaje de rechazo.
+    - El usuario permanece en la pantalla de inicio de sesión.
+    - El control "Mi cuenta" no está disponible.
+    - El control "Salir" no está disponible.
+    - No se establece una sesión autenticada.
 
-given:
-  - El usuario no se encuentra autenticado.
+risk:
+  level: critical
+  description: >
+    Evitar que credenciales inválidas establezcan una sesión o que
+    un rechazo de autenticación ocurra sin una señal observable
+    para el usuario.
 
-when:
-  - Ingresa un correo que no corresponde a un usuario válido.
-  - Ingresa una contraseña inválida.
-  - Solicita iniciar sesión.
+coverage:
+  count_as_scenario: true
 
-then:
-  - Se presenta un mensaje de rechazo.
-  - El usuario permanece en la pantalla de inicio de sesión.
-  - "Mi cuenta" no está disponible.
-  - "Salir" no está disponible.
+automation:
+  framework: playwright
+  project: public
+  spec: tests/validation/auth/VAL-AUTH-NEG-001.public.spec.ts
+
+preconditions: []
 
 testability_contract:
   - login-email
@@ -43,15 +61,23 @@ testability_contract:
 
 evidence:
   - execution-result
-  - screenshot
   - duration
-
-automation:
-  framework: playwright
-  project: public
-  spec: tests/validation/auth/VAL-AUTH-NEG-001.public.spec.ts
+  - screenshot-on-failure
+  - video-on-failure
+  - trace-on-failure
 
 tags:
   - auth
   - negative
+  - security
+
+suites:
   - smoke
+  - regression
+  - critical
+
+architecture:
+  - portal-spa
+  - authentication-api
+
+sequence: 2

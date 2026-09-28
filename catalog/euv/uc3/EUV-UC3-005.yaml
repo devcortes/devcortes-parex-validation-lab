@@ -1,0 +1,86 @@
+schema_version: 1
+
+id: EUV-UC3-005
+name: Iniciar la ceremonia de firma
+
+kind: euv
+status: automated
+
+environment:
+  allowed:
+    - dev
+  default: dev
+
+use_case:
+  id: UC3
+  name: Adquirir CDT
+
+objective: >
+  Validar que un proceso listo para firma puede abrir una ceremonia
+  independiente y entregar al inversionista la pantalla inicial de
+  revisión del proceso de firma.
+
+scenario:
+  given:
+    - Existe un proceso de adquisición en etapa de firma.
+    - La acción para iniciar la ceremonia está disponible.
+  when:
+    - El inversionista solicita iniciar la firma.
+  then:
+    - Se crea o recupera una ceremonia de firma asociada al proceso.
+    - El navegador ingresa a la aplicación de firma.
+    - La ceremonia presenta su pantalla inicial de revisión.
+    - La ceremonia posee un identificador de firma válido.
+
+risk:
+  level: critical
+  description: >
+    Evitar que un proceso listo para firmar no pueda establecer una
+    ceremonia válida o que exista una ruptura de trazabilidad entre
+    la adquisición y la ceremonia de firma.
+
+coverage:
+  count_as_scenario: true
+
+automation:
+  framework: playwright
+  project: portal
+  spec: tests/euv/uc3/EUV-UC3-005.portal.spec.ts
+
+preconditions:
+  - PRE-DEV-AUTH-001
+  - EUV-UC3-004
+
+testability_contract:
+  - process-stage-signature
+  - process-signature-start
+  - signing-ceremony
+  - signing-screen-review
+
+evidence:
+  - execution-result
+  - duration
+  - screenshot-on-failure
+  - video-on-failure
+  - trace-on-failure
+  - json-state
+
+tags:
+  - uc3
+  - signing
+  - ceremony
+  - critical-path
+
+suites:
+  - smoke
+  - regression
+  - critical
+  - signing
+
+architecture:
+  - portal-spa
+  - signing-spa
+  - processes-api
+  - signatures-api
+
+sequence: 5

@@ -1,0 +1,79 @@
+schema_version: 1
+
+id: EUV-UC3-004
+name: Avanzar de documentación completa a firma
+
+kind: euv
+status: automated
+
+environment:
+  allowed:
+    - dev
+  default: dev
+
+use_case:
+  id: UC3
+  name: Adquirir CDT
+
+objective: >
+  Validar que un proceso con la documentación requerida registrada
+  puede avanzar desde la etapa documental hacia la etapa de firma.
+
+scenario:
+  given:
+    - Existe un proceso de adquisición en etapa de documentos.
+    - La documentación requerida se encuentra registrada.
+  when:
+    - El inversionista solicita continuar con el proceso.
+  then:
+    - La etapa de documentos se completa.
+    - El proceso avanza a la etapa de firma.
+    - La acción para iniciar la firma queda disponible.
+
+risk:
+  level: high
+  description: >
+    Evitar que procesos incompletos avancen hacia firma o que procesos
+    documentalmente completos queden detenidos sin posibilidad de continuar.
+
+coverage:
+  count_as_scenario: true
+
+automation:
+  framework: playwright
+  project: portal
+  spec: tests/euv/uc3/EUV-UC3-004.portal.spec.ts
+
+preconditions:
+  - PRE-DEV-AUTH-001
+  - EUV-UC3-003
+
+testability_contract:
+  - process-stage-documents
+  - process-advance-documents
+  - process-stage-signature
+  - process-signature-start
+
+evidence:
+  - execution-result
+  - duration
+  - screenshot-on-failure
+  - video-on-failure
+  - trace-on-failure
+
+tags:
+  - uc3
+  - acquisition
+  - documents
+  - signing
+
+suites:
+  - regression
+  - signing
+
+architecture:
+  - portal-spa
+  - processes-api
+  - signatures-api
+
+sequence: 4

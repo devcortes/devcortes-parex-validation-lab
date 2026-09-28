@@ -1,0 +1,17 @@
+id: smoke
+name: Smoke
+
+description: >
+  Conjunto mínimo de escenarios que permite verificar rápidamente que
+  las capacidades esenciales del producto se encuentran disponibles
+  antes de ejecutar validaciones de mayor profundidad.
+
+purpose: >
+  Detectar fallos evidentes de disponibilidad o de los recorridos
+  principales con un costo de ejecución reducido.
+
+execution:
+  order: 10
+
+tags:
+  - smoke

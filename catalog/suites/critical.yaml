@@ -1,0 +1,18 @@
+id: critical
+name: Critical
+
+description: >
+  Conjunto de escenarios asociados a riesgos altos o críticos cuyo
+  fallo puede comprometer identidad, autenticación, consentimiento,
+  adquisición o firma.
+
+purpose: >
+  Permitir ejecutar de manera prioritaria los comportamientos con mayor
+  impacto funcional o de seguridad.
+
+execution:
+  order: 30
+
+tags:
+  - critical
+  - security

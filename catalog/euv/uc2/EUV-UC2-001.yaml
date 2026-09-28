@@ -1,0 +1,83 @@
+schema_version: 1
+
+id: EUV-UC2-001
+name: Registrar una cuenta de inversionista
+
+kind: euv
+status: automated
+
+environment:
+  allowed:
+    - dev
+    - pro
+  default: dev
+
+use_case:
+  id: UC2
+  name: Registrar y habilitar inversionista
+
+objective: >
+  Validar que una persona puede iniciar el proceso de incorporación
+  creando una cuenta con la información básica requerida y que el
+  sistema reconoce de manera observable la creación de esa cuenta.
+
+scenario:
+  given:
+    - La persona no posee una cuenta con el correo utilizado para la prueba.
+    - La pantalla de registro se encuentra disponible.
+  when:
+    - La persona ingresa su nombre.
+    - La persona ingresa un correo único.
+    - La persona define una contraseña.
+    - La persona solicita crear la cuenta.
+  then:
+    - La solicitud de registro es aceptada.
+    - El sistema reconoce la existencia de la nueva cuenta.
+    - La persona puede continuar con el proceso de incorporación.
+
+risk:
+  level: high
+  description: >
+    Evitar que una persona quede imposibilitada para iniciar su
+    incorporación como inversionista por fallas en la creación
+    de su cuenta básica.
+
+coverage:
+  count_as_scenario: true
+
+automation:
+  framework: playwright
+  project: public
+  spec: tests/euv/uc2/EUV-UC2-001.public.spec.ts
+
+preconditions: []
+
+testability_contract:
+  - portal-register-form
+  - register-name
+  - register-email
+  - register-password
+  - portal-register-submit
+
+evidence:
+  - execution-result
+  - duration
+  - screenshot-on-failure
+  - video-on-failure
+  - trace-on-failure
+
+tags:
+  - uc2
+  - registration
+  - onboarding
+  - investor
+
+suites:
+  - smoke
+  - regression
+
+architecture:
+  - portal-spa
+  - authentication-api
+
+sequence: 1

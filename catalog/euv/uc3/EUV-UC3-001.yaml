@@ -1,0 +1,87 @@
+schema_version: 1
+
+id: EUV-UC3-001
+name: Iniciar una adquisición de CDT
+
+kind: euv
+status: automated
+
+environment:
+  allowed:
+    - dev
+  default: dev
+
+use_case:
+  id: UC3
+  name: Adquirir CDT
+
+objective: >
+  Validar que un inversionista autenticado puede seleccionar una oferta
+  disponible desde el simulador e iniciar un nuevo proceso de adquisición
+  de CDT en el portal.
+
+scenario:
+  given:
+    - El inversionista tiene una sesión autenticada.
+    - El simulador se encuentra disponible.
+    - Existe al menos una oferta disponible para las condiciones simuladas.
+  when:
+    - El inversionista ingresa el monto de inversión.
+    - El inversionista selecciona el plazo.
+    - El inversionista solicita la simulación.
+    - El inversionista selecciona una de las ofertas disponibles.
+  then:
+    - Se crea un proceso de adquisición.
+    - El portal navega al proceso recién creado.
+    - El proceso inicia en la etapa de información del inversionista.
+
+risk:
+  level: critical
+  description: >
+    Evitar que una oferta seleccionada no pueda transformarse en un proceso
+    real de adquisición o que el proceso sea creado sin trazabilidad hacia
+    la interacción iniciada por el inversionista.
+
+coverage:
+  count_as_scenario: true
+
+automation:
+  framework: playwright
+  project: portal
+  spec: tests/euv/uc3/EUV-UC3-001.portal.spec.ts
+
+preconditions:
+  - PRE-DEV-AUTH-001
+
+testability_contract:
+  - simulator-investment-amount
+  - simulator-term-540
+  - simulator-submit
+  - simulator-results
+  - simulator-offer-open
+  - process-form
+
+evidence:
+  - execution-result
+  - duration
+  - screenshot-on-failure
+  - video-on-failure
+  - trace-on-failure
+
+tags:
+  - uc3
+  - acquisition
+  - simulator
+  - process
+
+suites:
+  - smoke
+  - regression
+  - critical
+
+architecture:
+  - simulator-spa
+  - portal-spa
+  - processes-api
+
+sequence: 1
