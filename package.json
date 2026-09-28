@@ -16,7 +16,8 @@
     "parex:cli": "tsx scripts/parex.ts",
     "parex:defects": "tsx scripts/validate-defects.ts",
     "parex:defects:sync": "tsx scripts/sync-defects.ts",
-    "parex:sync": "npm run parex:catalog:sync && npm run parex:defects:sync"
+    "parex:sync": "npm run parex:catalog:sync && npm run parex:defects:sync",
+    "parex:euv": "tsx scripts/list-euv.ts"
   },
   "keywords": [],
   "author": "",
